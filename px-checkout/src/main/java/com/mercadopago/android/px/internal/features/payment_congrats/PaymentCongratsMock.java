@@ -26,29 +26,29 @@ public final class PaymentCongratsMock {
             new PaymentCongratsResponse.Discount("Descuentos por tu nivel", "", action, downloadApp, null, itemList);
 
         //Score
-        PaymentCongratsResponse.Score.Progress progress =
-            new PaymentCongratsResponse.Score.Progress(0.14f, "#1AC2B0", 2);
-        PaymentCongratsResponse.Score score =
-            new PaymentCongratsResponse.Score(progress, "Sumaste 1 Mercado Punto", action);
+        PaymentCongratsResponse.Loyalty.Progress progress =
+            new PaymentCongratsResponse.Loyalty.Progress(0.14f, "#1AC2B0", 2);
+        PaymentCongratsResponse.Loyalty loyalty =
+            new PaymentCongratsResponse.Loyalty(progress, "Sumaste 1 Mercado Punto", action);
 
         //Payment Methods
         ArrayList<PaymentInfo> paymentList = new ArrayList();
         paymentList.add(
             new PaymentInfo.Builder()
-                .withPaymentMethodId("account_money")
+                .withPaymentMethodId("nativa")
                 .withPaymentMethodName("Money in Mercado Pago")
-                .withPaymentMethodType(PaymentInfo.PaymentMethodType.ACCOUNT_MONEY)
-                .withAmountPaid("$100")
+                .withPaymentMethodType(PaymentInfo.PaymentMethodType.CONSUMER_CREDITS)
+                .withPaidAmount("$100")
                 .withDiscountData("50% OFF", "$200")
                 .build()
         );
         paymentList.add(
             new PaymentInfo.Builder()
-                .withPaymentMethodId("master")
+                .withPaymentMethodId("tarshop")
                 .withPaymentMethodName("Visa")
                 .withPaymentMethodType(PaymentInfo.PaymentMethodType.CREDIT_CARD)
                 .withLastFourDigits("8020")
-                .withAmountPaid( "$100")
+                .withPaidAmount( "$100")
                 .withInstallmentsData(3, "$39,90", "$119,70", BigDecimal.valueOf(19.71))
                 .build()
         );
@@ -56,15 +56,14 @@ public final class PaymentCongratsMock {
         //Congrats
         PaymentCongratsModel congrats = new PaymentCongratsModel.Builder()
             .withCongratsType(PaymentCongratsModel.CongratsType.APPROVED)
-            .withTitle("Payment Congrats Example")
-            .withImageUrl("https://www.jqueryscript.net/images/Simplest-Responsive-jQuery-Image-Lightbox-Plugin-simple-lightbox.jpg")
-            .withExitActionSecondary("Continuar", 13)
-            .withPaymentsInfo(paymentList)
+            .withHeader("Payment Congrats Example","https://www.jqueryscript.net/images/Simplest-Responsive-jQuery-Image-Lightbox-Plugin-simple-lightbox.jpg")
+            .withFooterSecondaryAction("Continuar", 13)
+            .withPaymentMethodInfo(paymentList.get(0))
+            .withSplitPaymentMethod(paymentList.get(1))
             .withShouldShowPaymentMethod(true)
-            .withShouldShowReceipt(true)
-            .withReceiptId("12312312")
-            .withDiscount(discount)
-            .withScore(score)
+            .withReceipt("12312312",true,null)
+            .withDiscounts(discount)
+            .withLoyalty(loyalty)
             .build();
 
         return congrats;

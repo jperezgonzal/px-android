@@ -124,7 +124,7 @@ public class PaymentResultMethod extends ConstraintLayout {
                 .withPaymentMethodName(paymentData.getPaymentMethod().getName())
                 .withPaymentMethodType(
                     PaymentInfo.PaymentMethodType.fromName(paymentData.getPaymentMethod().getPaymentTypeId()))
-                .withAmountPaid(getPrettyAmount(currency,
+                .withPaidAmount(getPrettyAmount(currency,
                     PaymentDataHelper.getPrettyAmountToPay(paymentData)));
 
             if (paymentData.getPaymentMethod().getDisplayInfo() != null) {
@@ -132,15 +132,18 @@ public class PaymentResultMethod extends ConstraintLayout {
                     paymentData.getPaymentMethod().getDisplayInfo().getResultInfo().getTitle()
                     , paymentData.getPaymentMethod().getDisplayInfo().getResultInfo().getSubtitle());
 
-                final PaymentCongratsText description = new PaymentCongratsText(
-                    paymentData.getPaymentMethod().getDisplayInfo().getDescription().getMessage(),
-                    paymentData.getPaymentMethod().getDisplayInfo().getDescription().getBackgroundColor(),
-                    paymentData.getPaymentMethod().getDisplayInfo().getDescription().getTextColor(),
-                    paymentData.getPaymentMethod().getDisplayInfo().getDescription().getWeight()
-                );
+                paymentInfoBuilder.withConsumerCreditsInfo(paymentResultInfo);
 
-                paymentInfoBuilder.withConsumerCreditsInfo(paymentResultInfo)
-                    .withDescription(description);
+                if (paymentData.getPaymentMethod().getDisplayInfo().getDescription() != null) {
+                    final PaymentCongratsText description = new PaymentCongratsText(
+                        paymentData.getPaymentMethod().getDisplayInfo().getDescription() != null ? paymentData.getPaymentMethod().getDisplayInfo().getDescription().getMessage(): "",
+                        paymentData.getPaymentMethod().getDisplayInfo().getDescription().getBackgroundColor(),
+                        paymentData.getPaymentMethod().getDisplayInfo().getDescription().getTextColor(),
+                        paymentData.getPaymentMethod().getDisplayInfo().getDescription().getWeight()
+                    );
+                    paymentInfoBuilder.withDescription(description);
+                }
+
             }
             if (paymentData.getDiscount() != null) {
                 paymentInfoBuilder
@@ -163,9 +166,9 @@ public class PaymentResultMethod extends ConstraintLayout {
         public static Model with(@NonNull final PaymentInfo paymentInfo, @Nullable final String statement) {
 
             final PaymentResultAmount.Model amountModel = new PaymentResultAmount.Model.Builder(
-                paymentInfo.amountPaid, paymentInfo.rawAmount)
+                paymentInfo.paidAmount, paymentInfo.rawAmount)
                 .setDiscountName(paymentInfo.discountName)
-                .setNumberOfInstallments(paymentInfo.numberOfInstallments)
+                .setNumberOfInstallments(paymentInfo.installmentsCount)
                 .setInstallmentsAmount(paymentInfo.installmentsAmount)
                 .setInstallmentsRate(paymentInfo.installmentsRate)
                 .setInstallmentsTotalAmount(paymentInfo.installmentsTotalAmount)
