@@ -5,7 +5,6 @@ import android.app.Activity
 import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.Fragment
 import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
@@ -13,8 +12,10 @@ import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import com.mercadolibre.android.andesui.snackbar.AndesSnackbar
+import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration
+import com.mercadolibre.android.andesui.snackbar.type.AndesSnackbarType
 import com.mercadolibre.android.ui.widgets.MeliButton
-import com.mercadolibre.android.ui.widgets.MeliSnackbar
 import com.mercadopago.android.px.R
 import com.mercadopago.android.px.addons.BehaviourProvider
 import com.mercadopago.android.px.addons.internal.SecurityValidationHandler
@@ -129,7 +130,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     @SuppressLint("Range")
     private fun showSnackBar(error: MercadoPagoError) {
         view?.let {
-            MeliSnackbar.make(it, error.message, Snackbar.LENGTH_LONG, MeliSnackbar.SnackbarType.ERROR).show()
+            AndesSnackbar(it.context, it, AndesSnackbarType.ERROR, error.message, AndesSnackbarDuration.LONG).show()
         }
     }
 

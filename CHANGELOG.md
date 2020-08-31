@@ -1,3 +1,9 @@
+## VERSION 4.57.0
+_27_08_2020_
+* FEATURE - Added AndesUI lib snackbar.
+* ENHANCEMENT - Removed session init check.
+* ENHANCEMENT - Legacy flow data is persisted.
+
 ## VERSION 4.56.1
 _21_08_2020_
 * FIX - bottom sheet fake footer height adjustment
