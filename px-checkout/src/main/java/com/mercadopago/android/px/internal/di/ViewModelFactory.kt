@@ -5,21 +5,28 @@ import androidx.lifecycle.ViewModelProvider
 import com.mercadopago.android.px.internal.core.ConnectionHelper
 import com.mercadopago.android.px.internal.features.express.offline_methods.OfflineMethodsViewModel
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonViewModel
+import com.mercadopago.android.px.internal.features.security_code.CardConfigurationMapper
+import com.mercadopago.android.px.internal.features.security_code.SecurityCodeViewModel
 
 internal class ViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        val session = Session.getInstance()
         if (modelClass.isAssignableFrom(PayButtonViewModel::class.java)) {
-            return PayButtonViewModel(Session.getInstance().paymentRepository,
-                Session.getInstance().configurationModule.productIdProvider,
+            return PayButtonViewModel(session.paymentRepository,
+                    session.configurationModule.productIdProvider,
                 ConnectionHelper.instance,
-                Session.getInstance().configurationModule.paymentSettings,
-                Session.getInstance().configurationModule.customTextsRepository) as T
+                    session.configurationModule.paymentSettings,
+                    session.configurationModule.customTextsRepository) as T
         } else if(modelClass.isAssignableFrom(OfflineMethodsViewModel::class.java)) {
-            return OfflineMethodsViewModel(Session.getInstance().initRepository,
-                Session.getInstance().configurationModule.paymentSettings,
-                Session.getInstance().amountRepository,
-                Session.getInstance().discountRepository) as T
+            return OfflineMethodsViewModel(session.initRepository,
+                    session.configurationModule.paymentSettings,
+                    session.amountRepository,
+                    session.discountRepository) as T
+        } else if(modelClass.isAssignableFrom(SecurityCodeViewModel::class.java)) {
+            return SecurityCodeViewModel(session.initRepository,
+                    session.configurationModule.userSelectionRepository,
+                    CardConfigurationMapper()) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

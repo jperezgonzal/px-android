@@ -2,16 +2,17 @@ package com.mercadopago.android.px.internal.features.pay_button
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.core.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Observer
 import com.mercadolibre.android.andesui.snackbar.AndesSnackbar
 import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration
 import com.mercadolibre.android.andesui.snackbar.type.AndesSnackbarType
@@ -20,7 +21,7 @@ import com.mercadopago.android.px.R
 import com.mercadopago.android.px.addons.BehaviourProvider
 import com.mercadopago.android.px.addons.internal.SecurityValidationHandler
 import com.mercadopago.android.px.addons.model.SecurityValidationData
-import com.mercadopago.android.px.internal.di.Session
+import com.mercadopago.android.px.internal.di.viewModel
 import com.mercadopago.android.px.internal.features.Constants
 import com.mercadopago.android.px.internal.features.SecurityCodeActivity
 import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultActivity
@@ -29,6 +30,8 @@ import com.mercadopago.android.px.internal.features.explode.ExplodeDecorator
 import com.mercadopago.android.px.internal.features.explode.ExplodingFragment
 import com.mercadopago.android.px.internal.features.payment_result.PaymentResultActivity
 import com.mercadopago.android.px.internal.features.plugins.PaymentProcessorActivity
+import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment
+import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment.Companion.newInstance
 import com.mercadopago.android.px.internal.util.FragmentUtil
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.view.OnSingleClickListener
@@ -44,7 +47,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     private var buttonStatus = MeliButton.State.NORMAL
     private lateinit var button: MeliButton
-    private lateinit var viewModel: PayButtonViewModel
+    private val viewModel: PayButtonViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_pay_button, container, false)
@@ -52,7 +55,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = Session.getInstance().viewModelModule.get(this, PayButtonViewModel::class.java)
 
         when {
             targetFragment is PayButton.Handler -> viewModel.attach(targetFragment as PayButton.Handler)
@@ -78,7 +80,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             buttonTextLiveData.observe(viewLifecycleOwner,
                 Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
             cvvRequiredLiveData.observe(viewLifecycleOwner,
-                Observer { pair -> pair?.let { showSecurityCodeScreen(it.first, it.second) } })
+                    Observer { pair -> pair?.let { showSecurityCodeScreen(it.first, it.second) } })
             recoverRequiredLiveData.observe(viewLifecycleOwner,
                 Observer { recovery -> recovery?.let { showSecurityCodeForRecovery(it) } })
             stateUILiveData.observe(viewLifecycleOwner, Observer { state -> state?.let { onStateUIChanged(it) } })
@@ -153,11 +155,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
                 BehaviourProvider.getSecurityBehaviour().extraResultKey, false) ?: false
             enable()
             onSecurityValidated(resultCode == Activity.RESULT_OK, securityRequested)
-        } else if (requestCode == REQ_CODE_SECURITY_CODE) {
-            cancelLoading()
-            if (resultCode == Activity.RESULT_OK) {
-                viewModel.startPayment()
-            }
         } else if (requestCode == REQ_CODE_CONGRATS && resultCode == Constants.RESULT_ACTION) {
             handleAction(data)
         } else if (resultCode == Constants.RESULT_PAYMENT) {
@@ -242,7 +239,13 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     }
 
     private fun showSecurityCodeScreen(card: Card, reason: Reason?) {
-        SecurityCodeActivity.startForSavedCard(this, card, reason, REQ_CODE_SECURITY_CODE)
+        activity?.supportFragmentManager?.apply {
+            val securityFragment = newInstance()
+            beginTransaction()
+                    .replace(R.id.one_tap_fragment, securityFragment, SecurityCodeFragment.TAG)
+                    .addToBackStack(SecurityCodeFragment.TAG)
+                    .commitAllowingStateLoss()
+        }
     }
 
     override fun isExploding(): Boolean {

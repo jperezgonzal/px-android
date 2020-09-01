@@ -1,12 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".internal.features.security_code.SecurityCodeFragment">
 
-   <com.meli.android.carddrawer.model.CardDrawerView
+   <EditText
+       android:id="@+id/editText"
+       android:layout_width="0dp"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="36dp"
+       app:layout_constraintBottom_toTopOf="@+id/pay_button"
+       app:layout_constraintEnd_toEndOf="@+id/card_drawer"
+       app:layout_constraintHorizontal_bias="0.5"
+       app:layout_constraintStart_toStartOf="@+id/card_drawer"
+       app:layout_constraintTop_toBottomOf="@+id/card_drawer" />
+
+   <TextView
+       android:id="@+id/cvv_subtitle"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="24dp"
+       android:lineSpacingExtra="4sp"
+       android:text="Búscalo en el Home Banking o la app de CAIXA."
+       android:textColor="#cc000000"
+       android:textSize="16sp"
+       android:visibility="gone"
+       app:layout_constraintBottom_toTopOf="@+id/card_drawer"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.5"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/cvv_title"
+       tools:text="Búscalo en el Home Banking o la app de CAIXA." />
+
+   <TextView
+       android:id="@+id/cvv_title"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:lineSpacingExtra="6sp"
+       android:maxLines="2"
+       android:text="Ingresa el código de seguridad"
+       android:textColor="#cc000000"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toTopOf="@+id/cvv_subtitle"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.5"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/cvv_toolbar"
+       app:layout_constraintVertical_bias="0.0"
+       app:layout_constraintVertical_chainStyle="packed"
+       tools:text="Ingresa el código de seguridad" />
+
+   <androidx.appcompat.widget.Toolbar
+       android:id="@+id/cvv_toolbar"
        android:layout_width="match_parent"
-       android:layout_height="match_parent" />
+       android:layout_height="?attr/actionBarSize"
+       android:theme="@style/CvvToolbarTransparentTheme"
+       app:contentInsetEnd="0dp"
+       app:contentInsetLeft="0dp"
+       app:contentInsetRight="0dp"
+       app:contentInsetStart="0dp"
+       app:contentInsetStartWithNavigation="0dp"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent" />
+
+   <com.meli.android.carddrawer.model.CardDrawerView
+       android:id="@+id/card_drawer"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_marginEnd="100dp"
+       android:layout_marginStart="100dp"
+       android:layout_marginTop="34dp"
+       app:card_header_behaviour="responsive"
+       app:card_header_internal_padding="0dp"
+       app:layout_constraintBottom_toTopOf="@+id/editText"
+       app:layout_constraintDimensionRatio="H,156:96"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.5"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/cvv_subtitle" />
+
+   <fragment
+       android:id="@+id/pay_button"
+       android:name="com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginEnd="24dp"
+       android:layout_marginStart="24dp"
+       android:layout_marginTop="28dp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.5"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/editText"
+       tools:layout="@layout/fragment_pay_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

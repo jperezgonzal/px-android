@@ -1,7 +1,6 @@
 package com.mercadopago.android.px.internal.features.pay_button
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations.map
 import android.os.Bundle
@@ -26,6 +25,7 @@ import com.mercadopago.android.px.internal.util.SecurityValidationDataFactory
 import com.mercadopago.android.px.internal.viewmodel.BusinessPaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PostPaymentAction
+import com.mercadopago.android.px.internal.viewmodel.custom.MediatorSingleLiveEvent
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
@@ -58,9 +58,9 @@ internal class PayButtonViewModel(
     private var paymentConfiguration: PaymentConfiguration? = null
     private var paymentModel: PaymentModel? = null
 
-    val cvvRequiredLiveData = MediatorLiveData<Pair<Card, Reason>?>()
-    val recoverRequiredLiveData = MediatorLiveData<PaymentRecovery?>()
-    val stateUILiveData = MediatorLiveData<PayButtonState>()
+    val cvvRequiredLiveData = MediatorSingleLiveEvent<Pair<Card, Reason>?>()
+    val recoverRequiredLiveData = MediatorSingleLiveEvent<PaymentRecovery?>()
+    val stateUILiveData = MediatorSingleLiveEvent<PayButtonState>()
     private var observingService = false
 
     private fun <T : Event<X>, X : Any, I> transform(liveData: LiveData<T>, block: (content: X) -> I): LiveData<I?> {
@@ -116,7 +116,7 @@ internal class PayButtonViewModel(
 
     override fun startPayment() {
         if (paymentService.isExplodingAnimationCompatible) {
-            stateUILiveData.postValue(ButtonLoadingStarted(paymentService.paymentTimeout, buttonConfig))
+            stateUILiveData.value = ButtonLoadingStarted(paymentService.paymentTimeout, buttonConfig)
         }
         handler?.enqueueOnExploding(object : PayButton.OnEnqueueResolvedCallback {
             override fun success() {
@@ -158,7 +158,10 @@ internal class PayButtonViewModel(
 
         // Cvv required event
         val cvvRequiredLiveData: LiveData<Pair<Card, Reason>?> = transform(serviceLiveData.requireCvvLiveData) { it }
-        this.cvvRequiredLiveData.addSource(cvvRequiredLiveData) { value -> this.cvvRequiredLiveData.value = value }
+        this.cvvRequiredLiveData.addSource(cvvRequiredLiveData) { value ->
+            stateUILiveData.value = ButtonLoadingCanceled
+            this.cvvRequiredLiveData.value = value
+        }
 
         // Invalid esc event
         val recoverRequiredLiveData: LiveData<PaymentRecovery?> =
