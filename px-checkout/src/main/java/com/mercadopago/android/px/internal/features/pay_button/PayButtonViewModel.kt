@@ -58,8 +58,8 @@ internal class PayButtonViewModel(
     private var paymentConfiguration: PaymentConfiguration? = null
     private var paymentModel: PaymentModel? = null
 
-    val cvvRequiredLiveData = MediatorSingleLiveEvent<Pair<Card, Reason>?>()
-    val recoverRequiredLiveData = MediatorSingleLiveEvent<PaymentRecovery?>()
+    val cvvRequiredLiveData = MediatorSingleLiveEvent<Pair<PaymentConfiguration, Reason>?>()
+    val recoverRequiredLiveData = MediatorSingleLiveEvent<Pair<PaymentConfiguration, PaymentRecovery>>()
     val stateUILiveData = MediatorSingleLiveEvent<PayButtonState>()
     private var observingService = false
 
@@ -157,16 +157,19 @@ internal class PayButtonViewModel(
         stateUILiveData.addSource(paymentFinishedLiveData) { value -> stateUILiveData.value = value }
 
         // Cvv required event
-        val cvvRequiredLiveData: LiveData<Pair<Card, Reason>?> = transform(serviceLiveData.requireCvvLiveData) { it }
+        val cvvRequiredLiveData: LiveData<Reason?> = transform(serviceLiveData.requireCvvLiveData) { it }
         this.cvvRequiredLiveData.addSource(cvvRequiredLiveData) { value ->
+            this.cvvRequiredLiveData.value = Pair(paymentConfiguration!!, value!!)
             stateUILiveData.value = ButtonLoadingCanceled
-            this.cvvRequiredLiveData.value = value
         }
 
         // Invalid esc event
         val recoverRequiredLiveData: LiveData<PaymentRecovery?> =
             transform(serviceLiveData.recoverInvalidEscLiveData) { it.takeIf { it.shouldAskForCvv() } }
-        this.recoverRequiredLiveData.addSource(recoverRequiredLiveData) { value -> this.recoverRequiredLiveData.value = value }
+        this.recoverRequiredLiveData.addSource(recoverRequiredLiveData) { value ->
+            this.recoverRequiredLiveData.value = Pair(paymentConfiguration!!, value!!)
+            stateUILiveData.value = ButtonLoadingCanceled
+        }
     }
 
     private fun onPaymentProcessingError() {
@@ -207,7 +210,7 @@ internal class PayButtonViewModel(
     }
 
     private fun recoverPayment(recovery: PaymentRecovery) {
-        recoverRequiredLiveData.value = recovery
+        recoverRequiredLiveData.value = Pair(paymentConfiguration!!, recovery)
     }
 
     private fun manageNoConnection() {

@@ -49,7 +49,7 @@ public class CardVaultActivity extends PXActivity<CardVaultPresenter> implements
     public static void startActivityForRecovery(@NonNull final Activity context, final int reqCode,
         @NonNull final PaymentRecovery paymentRecovery) {
         final Intent intent = new Intent(context, CardVaultActivity.class);
-        intent.putExtra(EXTRA_PAYMENT_RECOVERY, paymentRecovery);
+        intent.putExtra(EXTRA_PAYMENT_RECOVERY, (Parcelable) paymentRecovery);
         context.startActivityForResult(intent, reqCode);
     }
 
@@ -57,7 +57,7 @@ public class CardVaultActivity extends PXActivity<CardVaultPresenter> implements
     public static void startActivityForRecovery(final Fragment fragment, final int reqCode,
         @NonNull final PaymentRecovery paymentRecovery) {
         final Intent intent = new Intent(fragment.getActivity(), CardVaultActivity.class);
-        intent.putExtra(EXTRA_PAYMENT_RECOVERY, paymentRecovery);
+        intent.putExtra(EXTRA_PAYMENT_RECOVERY, (Parcelable) paymentRecovery);
         fragment.startActivityForResult(intent, reqCode);
     }
 

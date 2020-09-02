@@ -7,6 +7,8 @@ import com.mercadopago.android.px.internal.features.express.offline_methods.Offl
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonViewModel
 import com.mercadopago.android.px.internal.features.security_code.CardConfigurationMapper
 import com.mercadopago.android.px.internal.features.security_code.SecurityCodeViewModel
+import com.mercadopago.android.px.internal.viewmodel.SplitSelectionState
+import com.mercadopago.android.px.model.internal.FromExpressMetadataToPaymentConfiguration
 
 internal class ViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
@@ -26,6 +28,9 @@ internal class ViewModelFactory : ViewModelProvider.Factory {
         } else if(modelClass.isAssignableFrom(SecurityCodeViewModel::class.java)) {
             return SecurityCodeViewModel(session.initRepository,
                     session.configurationModule.userSelectionRepository,
+                    session.cardTokenRepository,
+                    session.mercadoPagoESC,
+                    session.configurationModule.paymentSettings,
                     CardConfigurationMapper()) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

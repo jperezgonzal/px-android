@@ -11,7 +11,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import com.mercadolibre.android.andesui.snackbar.AndesSnackbar
 import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration
@@ -23,7 +22,6 @@ import com.mercadopago.android.px.addons.internal.SecurityValidationHandler
 import com.mercadopago.android.px.addons.model.SecurityValidationData
 import com.mercadopago.android.px.internal.di.viewModel
 import com.mercadopago.android.px.internal.features.Constants
-import com.mercadopago.android.px.internal.features.SecurityCodeActivity
 import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultActivity
 import com.mercadopago.android.px.internal.features.dummy_result.DummyResultActivity
 import com.mercadopago.android.px.internal.features.explode.ExplodeDecorator
@@ -36,11 +34,8 @@ import com.mercadopago.android.px.internal.util.FragmentUtil
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.view.OnSingleClickListener
 import com.mercadopago.android.px.internal.viewmodel.PostPaymentAction
-import com.mercadopago.android.px.model.Card
-import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import com.mercadopago.android.px.tracking.internal.events.FrictionEventTracker
-import com.mercadopago.android.px.tracking.internal.model.Reason
 import com.mercadopago.android.px.internal.viewmodel.PayButtonViewModel as ButtonConfig
 
 class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler {
@@ -80,9 +75,13 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             buttonTextLiveData.observe(viewLifecycleOwner,
                 Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
             cvvRequiredLiveData.observe(viewLifecycleOwner,
-                    Observer { pair -> pair?.let { showSecurityCodeScreen(it.first, it.second) } })
+                    Observer { pair -> pair?.let {
+                        showSecurityCodeScreen(newInstance(it.first, it.second)) }
+                    })
             recoverRequiredLiveData.observe(viewLifecycleOwner,
-                Observer { recovery -> recovery?.let { showSecurityCodeForRecovery(it) } })
+                Observer { pair -> pair?.let {
+                    showSecurityCodeScreen(newInstance(it.first, it.second))
+                } })
             stateUILiveData.observe(viewLifecycleOwner, Observer { state -> state?.let { onStateUIChanged(it) } })
         }
     }
@@ -233,16 +232,10 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         button.visibility = VISIBLE
     }
 
-    private fun showSecurityCodeForRecovery(recovery: PaymentRecovery) {
-        cancelLoading()
-        SecurityCodeActivity.startForRecovery(this, recovery, REQ_CODE_SECURITY_CODE)
-    }
-
-    private fun showSecurityCodeScreen(card: Card, reason: Reason?) {
+    private fun showSecurityCodeScreen(securityCodeFragment: SecurityCodeFragment) {
         activity?.supportFragmentManager?.apply {
-            val securityFragment = newInstance()
             beginTransaction()
-                    .replace(R.id.one_tap_fragment, securityFragment, SecurityCodeFragment.TAG)
+                    .replace(R.id.one_tap_fragment, securityCodeFragment, SecurityCodeFragment.TAG)
                     .addToBackStack(SecurityCodeFragment.TAG)
                     .commitAllowingStateLoss()
         }

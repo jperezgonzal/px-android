@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -162,7 +163,7 @@ public final class PaymentProcessorActivity extends PXActivity
             @Override
             public void onRecoverPaymentEscInvalid(final PaymentRecovery recovery) {
                 final Intent intent = new Intent();
-                intent.putExtra(EXTRA_RECOVERY, recovery);
+                intent.putExtra(EXTRA_RECOVERY, (Parcelable) recovery);
                 setResult(RESULT_FAIL_ESC, intent);
                 finish();
             }
