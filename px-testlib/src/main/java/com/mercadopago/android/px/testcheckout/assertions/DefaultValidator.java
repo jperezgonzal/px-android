@@ -1,10 +1,9 @@
 package com.mercadopago.android.px.testcheckout.assertions;
 
+import android.view.View;
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.test.espresso.matcher.ViewMatchers;
-import android.view.View;
-import com.mercadopago.android.px.internal.util.TextUtil;
 import com.mercadopago.android.px.testcheckout.idleresources.WaitForBusinessResult;
 import com.mercadopago.android.px.testcheckout.idleresources.WaitForPaymentResult;
 import com.mercadopago.android.px.testcheckout.pages.BusinessCongratsPage;
@@ -40,16 +39,11 @@ import com.mercadopago.android.px.testcheckout.pages.SecurityCodePage;
 import com.mercadopago.android.px.testcheckout.pages.SecurityCodeToResultsPage;
 import org.hamcrest.Matcher;
 
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount;
 import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static com.mercadopago.android.testlib.matchers.CustomViewMatchers.withDigitsOnlyEqualsToTextView;
-import static com.mercadopago.android.testlib.matchers.CustomViewMatchers.withValueEqualToTextView;
-import static org.hamcrest.Matchers.anyOf;
 import static org.junit.Assert.assertTrue;
 
 public class DefaultValidator implements CheckoutValidator {
@@ -72,51 +66,38 @@ public class DefaultValidator implements CheckoutValidator {
 //        validateAmountView();
     }
 
-    /**
-     * @deprecated Use PayerInformationIdentificationPage as entry point of this flow.
-     */
     @Deprecated
     @Override
     public void validate(@NonNull final PayerInformationPage payerInformationPage) {
-        //TODO implement default PX Validations
     }
 
+    @Deprecated
     @CallSuper
     @Override
     public void validate(@NonNull final PayerInformationIdentificationPage page) {
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkIdentificationTypeId))
-            .check(matches(withValueEqualToTextView(com.mercadopago.android.px.R.id.mpsdkItemTitle)));
-
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkIdNumberView)).check(
-            matches(withDigitsOnlyEqualsToTextView(com.mercadopago.android.px.R.id.mpsdkCardIdentificationNumber)));
     }
 
+    @Deprecated
     @CallSuper
     @Override
     public void validate(@NonNull final PayerInformationBusinessNamePage page) {
-        // Checks empty input or input equals to output
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkBusinessName)).check(matches(anyOf(withText(TextUtil.EMPTY),
-            withValueEqualToTextView(com.mercadopago.android.px.R.id.mpsdkNameView))));
     }
 
+    @Deprecated
     @CallSuper
     @Override
     public void validate(@NonNull final PayerInformationFirstNamePage page) {
-        // Checks empty input or input equals to output
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkName)).check(matches(anyOf(withText(TextUtil.EMPTY),
-            withValueEqualToTextView(com.mercadopago.android.px.R.id.mpsdkNameView))));
     }
 
+    @Deprecated
     @CallSuper
     @Override
     public void validate(@NonNull final PayerInformationLastNamePage page) {
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkLastnameView))
-            .check(matches(withValueEqualToTextView(com.mercadopago.android.px.R.id.mpsdkLastName)));
     }
 
+    @Deprecated
     @Override
     public void validate(@NonNull final ReviewAndConfirmPage reviewAndConfirmPage) {
-        //TODO implement default PX Validations
     }
 
     @Override
@@ -231,38 +212,20 @@ public class DefaultValidator implements CheckoutValidator {
         //TODO implement default PX Validations
     }
 
+    @Deprecated
     @CallSuper
     @Override
     public void validate(@NonNull final CardAssociationResultSuccessPage cardAssociationResultSuccessPage) {
-        onView(ViewMatchers.withId(com.mercadopago.android.px.R.id.mpsdkCardAssociationResultSuccessBadge))
-            .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
     }
 
+    @Deprecated
     @Override
     public void validate(@NonNull final CardAssociationResultErrorPage cardAssociationResultErrorPage) {
-        //TODO implement default PX Validations
     }
 
+    @Deprecated
     @CallSuper
     @Override
     public void validate(@NonNull final PaymentTypesPage paymentTypesPage) {
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkActivityPaymentTypesRecyclerView))
-            .check(matches(hasMinimumChildCount(2)));
-    }
-
-    private void validateAmountView() {
-        final Matcher<View> amountDescription = withId(com.mercadopago.android.px.R.id.amount_description);
-        final Matcher<View> maxCouponAmount = withId(com.mercadopago.android.px.R.id.max_coupon_amount);
-        final Matcher<View> amountBeforeDiscount =
-            withId(com.mercadopago.android.px.R.id.amount_before_discount);
-        final Matcher<View> finalAmount = withId(com.mercadopago.android.px.R.id.final_amount);
-        final Matcher<View> arrow = withId(com.mercadopago.android.px.R.id.blue_arrow);
-        onView(amountDescription).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
-        onView(maxCouponAmount).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
-        onView(amountBeforeDiscount).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
-        onView(finalAmount).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
-        onView(arrow).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
-        onView(amountDescription).check(matches(withText(
-            getInstrumentation().getTargetContext().getString(com.mercadopago.android.px.R.string.px_total_to_pay))));
     }
 }

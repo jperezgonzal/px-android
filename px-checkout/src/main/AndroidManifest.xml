@@ -15,16 +15,6 @@
 
     <application>
         <activity
-            android:name=".internal.features.payment_methods.PaymentMethodsActivity"
-            android:label="@string/px_title_activity_payment_methods"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.bank_deals.BankDealsActivity"
-            android:label="@string/px_title_activity_bank_deals"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
             android:name=".internal.features.TermsAndConditionsActivity"
             android:label="@string/px_title_activity_terms_and_conditions"
             android:screenOrientation="sensorPortrait"
@@ -61,27 +51,6 @@
 
         </activity>
         <activity
-            android:name=".internal.features.guessing_card.GuessingCardActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize"/>
-        <activity
-            android:name=".internal.features.payment_vault.PaymentVaultActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.installments.InstallmentsActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.IssuersActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.cardvault.CardVaultActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
             android:name=".internal.features.ErrorActivity"
             android:screenOrientation="sensorPortrait"
             android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
@@ -97,18 +66,6 @@
             android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"
             android:windowSoftInputMode="stateVisible"/>
         <activity
-            android:name=".internal.features.PaymentTypesActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.review_payment_methods.ReviewPaymentMethodsActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.payer_information.PayerInformationActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
             android:name=".internal.features.plugins.PaymentProcessorActivity"
             android:screenOrientation="sensorPortrait"
             android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
@@ -117,22 +74,6 @@
             android:label=""
             android:screenOrientation="sensorPortrait"
             android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.review_and_confirm.ReviewAndConfirmActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.bank_deal_detail.BankDealDetailActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/Theme.MercadoPagoTheme.NoActionBar"/>
-        <activity
-            android:name=".internal.features.guessing_card.card_association_result.CardAssociationResultSuccessActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/ToolbarTransparentTheme"/>
-        <activity
-            android:name=".internal.features.guessing_card.card_association_result.CardAssociationResultErrorActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/ToolbarTransparentTheme"/>
         <activity android:name=".internal.features.dummy_result.DummyResultActivity"/>
 
         <provider

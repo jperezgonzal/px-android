@@ -2,10 +2,6 @@ package com.mercadopago.android.px.internal.viewmodel;
 
 import java.math.BigDecimal;
 
-/**
- * Created by mromar on 9/6/17.
- */
-
 public class SummaryItemDetail {
 
     private String name;

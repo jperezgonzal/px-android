@@ -32,7 +32,7 @@ public class SamplePaymentProcessorFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable final ViewGroup container,
         @Nullable final Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.px_view_progress_bar, container, false);
+        return inflater.inflate(R.layout.sample_payment_processor, container, false);
     }
 
     @Override

@@ -17,6 +17,7 @@ public class ConnectivityStateInterceptor implements Interceptor {
         this.context = context.getApplicationContext();
     }
 
+    @NonNull
     @Override
     public Response intercept(@NonNull final Chain chain) throws IOException {
         final ConnectivityManager connectivityManager =

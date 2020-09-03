@@ -75,14 +75,6 @@ public class ElementDescriptorView extends LinearLayout {
             subtitleTextMaxLines, gravity);
     }
 
-    public void setTitleTextSize(final float textSize) {
-        title.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-    }
-
-    public void setTitleTextColor(final int textColor) {
-        title.setTextColor(textColor);
-    }
-
     public void setIconSize(final int width, final int height) {
         final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) icon.getLayoutParams();
         layoutParams.width = width;

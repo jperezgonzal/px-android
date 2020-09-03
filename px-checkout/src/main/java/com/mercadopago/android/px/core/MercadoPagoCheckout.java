@@ -8,7 +8,6 @@ import androidx.annotation.Nullable;
 import com.mercadopago.android.px.configuration.AdvancedConfiguration;
 import com.mercadopago.android.px.configuration.PaymentConfiguration;
 import com.mercadopago.android.px.configuration.TrackingConfiguration;
-import com.mercadopago.android.px.internal.callbacks.CallbackHolder;
 import com.mercadopago.android.px.internal.datasource.MercadoPagoPaymentConfiguration;
 import com.mercadopago.android.px.internal.di.Session;
 import com.mercadopago.android.px.internal.features.checkout.CheckoutActivity;
@@ -60,7 +59,6 @@ public final class MercadoPagoCheckout {
         paymentConfiguration = builder.paymentConfiguration;
         checkoutPreference = builder.checkoutPreference;
         trackingConfiguration = builder.trackingConfiguration;
-        CallbackHolder.getInstance().clean();
     }
 
     /**

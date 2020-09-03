@@ -1,19 +1,10 @@
 package com.mercadopago.android.px.testcheckout.pages;
 
 import androidx.annotation.NonNull;
-import androidx.test.espresso.action.ViewActions;
-import android.view.View;
 import com.mercadopago.android.px.testcheckout.assertions.CheckoutValidator;
 import com.mercadopago.android.testlib.pages.PageObject;
-import org.hamcrest.Matcher;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.typeText;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
-
+@Deprecated
 public class PayerInformationPage extends PageObject<CheckoutValidator> {
 
     public PayerInformationPage() {
@@ -27,43 +18,19 @@ public class PayerInformationPage extends PageObject<CheckoutValidator> {
     // Case debit card - a way to resolve this is with a card type
     public PayerInformationPage enterIdentificationTypeAndNumberAndPressNext(@NonNull final String idType,
         @NonNull final String idNumber) {
-        selectIdentificationType(idType);
-        typeTextInView(idNumber, com.mercadopago.android.px.R.id.mpsdkCardIdentificationNumber);
-        pressNextButton();
         return new PayerInformationPage(validator);
     }
 
     public PayerInformationPage enterFirstNameAndPressNext(@NonNull final String firstName) {
-        typeTextInView(firstName, com.mercadopago.android.px.R.id.mpsdkName);
-        pressNextButton();
         return new PayerInformationPage(validator);
     }
 
     public ReviewAndConfirmPage enterLastNameAndPressNext(@NonNull final String lastName) {
-        typeTextInView(lastName, com.mercadopago.android.px.R.id.mpsdkLastName);
-        pressNextButton();
         return new ReviewAndConfirmPage(validator);
     }
 
     public ReviewAndConfirmPage enterBusinessNameAndPressNext(@NonNull final String businessName) {
-        typeTextInView(businessName, com.mercadopago.android.px.R.id.mpsdkBusinessName);
-        pressNextButton();
         return new ReviewAndConfirmPage(validator);
-    }
-
-    private void pressNextButton() {
-        Matcher<View> cardNextButtonTextMatcher = withId(com.mercadopago.android.px.R.id.mpsdkNextButton);
-        onView(cardNextButtonTextMatcher).perform(click());
-    }
-
-    private void typeTextInView(final String text, final int mpsdkCardIdentificationNumber) {
-        final Matcher<View> viewMatcher = withId(mpsdkCardIdentificationNumber);
-        onView(viewMatcher).perform(typeText(text));
-    }
-
-    private void selectIdentificationType(@NonNull final String idType) {
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkCardIdentificationType)).perform(click());
-        onView(withText(idType)).perform(click());
     }
 
     @Override
@@ -73,7 +40,6 @@ public class PayerInformationPage extends PageObject<CheckoutValidator> {
     }
 
     public PaymentMethodPage pressBack() {
-        onView(isRoot()).perform(ViewActions.pressBack());
         return new PaymentMethodPage(validator);
     }
 }

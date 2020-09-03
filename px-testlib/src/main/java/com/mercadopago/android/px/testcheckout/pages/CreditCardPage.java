@@ -1,18 +1,9 @@
 package com.mercadopago.android.px.testcheckout.pages;
 
-import androidx.test.espresso.action.ViewActions;
-import android.view.View;
-import com.mercadopago.android.px.R;
 import com.mercadopago.android.px.testcheckout.assertions.CheckoutValidator;
 import com.mercadopago.android.testlib.pages.PageObject;
-import org.hamcrest.Matcher;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.typeText;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-
+@Deprecated
 public class CreditCardPage extends PageObject<CheckoutValidator> {
 
     public CreditCardPage() {
@@ -30,36 +21,22 @@ public class CreditCardPage extends PageObject<CheckoutValidator> {
     }
 
     public NamePage enterCreditCardNumber(final String cardNumber) {
-        final Matcher<View> cardNextButtonTextMatcher = enterCardNumber(cardNumber);
-        onView(cardNextButtonTextMatcher).perform(click());
         return new NamePage(validator);
     }
 
     public NoCheckoutPage pressBackWithExclusion() {
-        onView(isRoot()).perform(ViewActions.pressBack());
         return new NoCheckoutPage(validator);
     }
 
     public PaymentMethodPage pressBack() {
-        onView(isRoot()).perform(ViewActions.pressBack());
         return new PaymentMethodPage(validator);
     }
 
     public CreditCardPage enterExcludedCreditCardNumber(final String cardNumber) {
-        enterCardNumber(cardNumber);
         return new CreditCardPage(validator);
     }
 
     public ReviewPaymentMethodsPage clickPaymentMethodNotSupportedSnackbar() {
-        final Matcher<View> notSupportedSnackbarTextMatcher = withId(R.id.mpsdkRedErrorContainer);
-        onView(notSupportedSnackbarTextMatcher).perform(click());
         return new ReviewPaymentMethodsPage(validator);
-    }
-
-    private Matcher<View> enterCardNumber(final String cardNumber) {
-        final Matcher<View> cardNumberEditTextMatcher = withId(R.id.mpsdkCardNumber);
-        final Matcher<View> cardNextButtonTextMatcher = withId(R.id.mpsdkNextButton);
-        onView(cardNumberEditTextMatcher).perform(typeText(cardNumber));
-        return cardNextButtonTextMatcher;
     }
 }

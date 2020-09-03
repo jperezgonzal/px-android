@@ -1,14 +1,9 @@
 package com.mercadopago.android.px.testcheckout.pages;
 
-import com.mercadopago.android.px.model.PaymentTypes;
 import com.mercadopago.android.px.testcheckout.assertions.CheckoutValidator;
 import com.mercadopago.android.testlib.pages.PageObject;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.matcher.ViewMatchers.withTagValue;
-import static org.hamcrest.Matchers.is;
-
+@Deprecated
 public class CardPage extends PageObject<CheckoutValidator> {
 
     public CardPage() {
@@ -20,12 +15,10 @@ public class CardPage extends PageObject<CheckoutValidator> {
     }
 
     public CreditCardPage selectCreditCard() {
-        onView(withTagValue(is(PaymentTypes.CREDIT_CARD))).perform(click());
         return new CreditCardPage(validator);
     }
 
     public DebitCardPage selectDebitCard() {
-        onView(withTagValue(is(PaymentTypes.DEBIT_CARD))).perform(click());
         return new DebitCardPage(validator);
     }
 

@@ -22,8 +22,6 @@ import com.mercadopago.android.px.model.PayerCost;
 import com.mercadopago.android.px.model.internal.Text;
 import java.util.Locale;
 
-//TODO unify with normal installments.
-
 public class InstallmentRowHolder extends RecyclerView.ViewHolder {
 
     private final View container;

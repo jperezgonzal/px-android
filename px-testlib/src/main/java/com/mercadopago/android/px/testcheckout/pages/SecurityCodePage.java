@@ -58,5 +58,4 @@ public class SecurityCodePage extends PageObject<CheckoutValidator> {
         onView(withId(com.mercadopago.android.px.R.id.mpsdkBackButton)).perform(click());
         return new ExpiryDatePage(validator);
     }
-
 }

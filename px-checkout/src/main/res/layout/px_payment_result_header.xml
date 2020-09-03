@@ -15,7 +15,7 @@
         android:theme="@style/ToolbarTransparentTheme"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:navigationIcon="@drawable/ic_close" />
+        tools:navigationIcon="@drawable/px_ic_close" />
 
     <com.mercadopago.android.px.internal.view.MPTextView
         android:id="@+id/title"

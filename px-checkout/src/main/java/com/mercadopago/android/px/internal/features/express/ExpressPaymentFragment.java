@@ -84,7 +84,6 @@ public class ExpressPaymentFragment extends Fragment implements ExpressPayment.V
     TitlePagerAdapter.InstallmentChanged, PayButton.Handler, GenericDialog.Listener, BackHandler {
 
     private static final String TAG = ExpressPaymentFragment.class.getSimpleName();
-    public static final String TAG_OFFLINE_METHODS_FRAGMENT = "TAG_OFFLINE_METHODS_FRAGMENT";
     private static final String TAG_HEADER_DYNAMIC_DIALOG = "TAG_HEADER_DYNAMIC_DIALOG";
     private static final String EXTRA_RENDER_MODE = "render_mode";
 
@@ -118,7 +117,7 @@ public class ExpressPaymentFragment extends Fragment implements ExpressPayment.V
     private PayButtonFragment payButtonFragment;
     private OfflineMethodsFragment offlineMethodsFragment;
 
-    public static Fragment getInstance() {
+    public static ExpressPaymentFragment newInstance() {
         return new ExpressPaymentFragment();
     }
 

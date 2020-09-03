@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import com.mercadolibre.android.ui.widgets.MeliButton;
 import com.mercadopago.android.px.internal.view.ActionDispatcher;
 import com.mercadopago.android.px.internal.view.CompactComponent;
-import com.mercadopago.android.px.internal.view.CopyAction;
-import com.mercadopago.android.px.internal.view.LinkAction;
+import com.mercadopago.android.px.internal.actions.CopyAction;
+import com.mercadopago.android.px.internal.actions.LinkAction;
 import com.mercadopago.android.px.model.Action;
 import com.mercadopago.android.px.model.InstructionAction;
 

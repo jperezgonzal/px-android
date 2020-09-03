@@ -200,7 +200,7 @@ public final class OneTapSamples {
     private static MercadoPagoCheckout.Builder startOneTapWithAccountMoneyAndCardsDebitCreditAndRejectedPayment() {
 
         final IPaymentDescriptor payment = getGenericPaymentRejected();
-        final SplitPaymentProcessor samplePaymentProcessor = new SamplePaymentProcessor(payment);
+        final SplitPaymentProcessor samplePaymentProcessor = new SamplePaymentProcessor(true, payment);
         final CheckoutPreference preference = getCheckoutPreferenceWithPayerEmail(120);
         return new MercadoPagoCheckout.Builder(ONE_TAP_MERCHANT_PUBLIC_KEY, preference,
             PaymentConfigurationUtils

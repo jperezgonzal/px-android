@@ -91,7 +91,7 @@ public final class AdvancedConfiguration implements Serializable {
      */
     @Deprecated
     public boolean isExpressPaymentEnabled() {
-        return expressEnabled;
+        return true;
     }
 
     @NonNull

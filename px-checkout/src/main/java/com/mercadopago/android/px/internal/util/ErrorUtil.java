@@ -21,25 +21,6 @@ public final class ErrorUtil {
     private ErrorUtil() {
     }
 
-    public static void startErrorActivity(final Activity launcherActivity) {
-        final String message = launcherActivity.getResources().getString(R.string.px_standard_error_message);
-        final MercadoPagoError mercadoPagoError = new MercadoPagoError(message, false);
-        startErrorActivity(launcherActivity, mercadoPagoError);
-    }
-
-    public static void startErrorActivity(final Activity launcherActivity, final String message,
-        final boolean recoverable) {
-        final MercadoPagoError mercadoPagoError = new MercadoPagoError(message, recoverable);
-        startErrorActivity(launcherActivity, mercadoPagoError);
-    }
-
-    public static void startErrorActivity(final Activity launcherActivity, final String message,
-        final String errorDetail,
-        final boolean recoverable) {
-        final MercadoPagoError mercadoPagoError = new MercadoPagoError(message, errorDetail, recoverable);
-        startErrorActivity(launcherActivity, mercadoPagoError);
-    }
-
     public static void startErrorActivity(final Activity launcherActivity,
         @Nullable final MercadoPagoError mercadoPagoError) {
         final String publicKey =

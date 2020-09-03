@@ -1,6 +1,5 @@
 package com.mercadopago.android.px.internal.core;
 
-import androidx.annotation.Keep;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -19,7 +18,7 @@ public class TLSSocketFactory extends SSLSocketFactory {
     private static final String[] TLS_V12 = { "TLSv1.2" };
 
     public TLSSocketFactory(final SSLSocketFactory baseSSlSocketFactory) {
-        this.delegate = baseSSlSocketFactory;
+        delegate = baseSSlSocketFactory;
     }
 
     @Override

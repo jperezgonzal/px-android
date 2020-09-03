@@ -17,8 +17,6 @@ public interface UserSelectionRepository {
 
     void select(@NonNull final Issuer issuer);
 
-    void select(String paymentType);
-
     @Nullable
     PaymentMethod getPaymentMethod();
 
@@ -26,8 +24,6 @@ public interface UserSelectionRepository {
     PaymentMethod getSecondaryPaymentMethod();
 
     void removePaymentMethodSelection();
-
-    boolean hasPayerCostSelected();
 
     boolean hasCardSelected();
 
@@ -41,7 +37,4 @@ public interface UserSelectionRepository {
     Card getCard();
 
     void reset();
-
-    @NonNull
-    String getPaymentType();
 }

@@ -10,10 +10,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by mromar on 9/14/17.
- */
-
 public class SummaryTest {
 
     @Test

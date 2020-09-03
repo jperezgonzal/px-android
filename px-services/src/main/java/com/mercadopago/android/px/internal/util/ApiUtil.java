@@ -1,6 +1,5 @@
 package com.mercadopago.android.px.internal.util;
 
-import androidx.annotation.NonNull;
 import com.mercadopago.android.px.model.exceptions.ApiException;
 import com.mercadopago.android.px.model.exceptions.NoConnectivityException;
 import java.io.IOException;

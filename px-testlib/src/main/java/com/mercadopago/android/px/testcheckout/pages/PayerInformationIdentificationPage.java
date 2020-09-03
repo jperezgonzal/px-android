@@ -1,19 +1,10 @@
 package com.mercadopago.android.px.testcheckout.pages;
 
 import androidx.annotation.NonNull;
-import androidx.test.espresso.action.ViewActions;
-import android.view.View;
 import com.mercadopago.android.px.testcheckout.assertions.CheckoutValidator;
 import com.mercadopago.android.testlib.pages.PageObject;
-import org.hamcrest.Matcher;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.typeText;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
-
+@Deprecated
 public final class PayerInformationIdentificationPage extends PageObject<CheckoutValidator> {
 
     public PayerInformationIdentificationPage(final CheckoutValidator validator) {
@@ -22,26 +13,15 @@ public final class PayerInformationIdentificationPage extends PageObject<Checkou
 
     public PayerInformationIdentificationPage enterIdentificationTypeAndNumber(@NonNull final String idType,
         @NonNull final String idNumber) {
-        selectIdentificationType(idType);
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkCardIdentificationNumber)).perform(typeText(idNumber));
         return new PayerInformationIdentificationPage(validator);
     }
 
     public PayerInformationFirstNamePage pressNextButtonToFirstNamePage() {
-        final Matcher<View> cardNextButtonTextMatcher = withId(com.mercadopago.android.px.R.id.mpsdkNextButton);
-        onView(cardNextButtonTextMatcher).perform(click());
         return new PayerInformationFirstNamePage(validator);
     }
 
     public PayerInformationBusinessNamePage pressNextButtonToBusinesstNamePage() {
-        final Matcher<View> cardNextButtonTextMatcher = withId(com.mercadopago.android.px.R.id.mpsdkNextButton);
-        onView(cardNextButtonTextMatcher).perform(click());
         return new PayerInformationBusinessNamePage(validator);
-    }
-
-    private void selectIdentificationType(@NonNull final String idType) {
-        onView(withId(com.mercadopago.android.px.R.id.mpsdkItemTitle)).perform(click());
-        onView(withText(idType)).perform(click());
     }
 
     @Override
@@ -51,7 +31,6 @@ public final class PayerInformationIdentificationPage extends PageObject<Checkou
     }
 
     public PaymentMethodPage pressBack() {
-        onView(isRoot()).perform(ViewActions.pressBack());
         return new PaymentMethodPage(validator);
     }
 }

@@ -1,14 +1,11 @@
 package com.mercadopago.android.px.testcheckout.pages;
 
-import com.mercadopago.android.px.R;
 import com.mercadopago.android.px.testcheckout.assertions.CheckoutValidator;
 import com.mercadopago.android.testlib.pages.PageObject;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
-
+@Deprecated
 public class PaymentTypesPage extends PageObject<CheckoutValidator> {
+
     public PaymentTypesPage() {
         // This constructor is intentionally empty. Nothing special is needed here.
     }
@@ -18,14 +15,10 @@ public class PaymentTypesPage extends PageObject<CheckoutValidator> {
     }
 
     public CardAssociationResultSuccessPage selectDebitCardTypeToCardAssociationResultSuccessPage() {
-        final int debit = R.string.px_debit_payment_type;
-        onView(withText(debit)).perform(click());
         return new CardAssociationResultSuccessPage(validator);
     }
 
     public CardAssociationResultSuccessPage selectCreditCardTypeToCardAssociationResultSuccessPage() {
-        final int credit = R.string.px_credit_payment_type;
-        onView(withText(credit)).perform(click());
         return new CardAssociationResultSuccessPage(validator);
     }
 

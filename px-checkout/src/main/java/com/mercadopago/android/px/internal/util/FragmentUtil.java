@@ -1,15 +1,12 @@
 package com.mercadopago.android.px.internal.util;
 
-import android.os.Bundle;
-import androidx.annotation.IdRes;
+import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.appcompat.app.AppCompatActivity;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import com.mercadopago.android.px.model.ExternalFragment;
 
 public final class FragmentUtil {
@@ -43,36 +40,6 @@ public final class FragmentUtil {
         }
     }
 
-    public static void addFragmentInside(@NonNull final ViewGroup viewGroup,
-        @IdRes final int resId,
-        @NonNull final ExternalFragment model) {
-        if (viewGroup.getContext() instanceof AppCompatActivity) {
-            addFragmentInside(viewGroup, (AppCompatActivity) viewGroup.getContext(), resId, model.zClassName,
-                model.args);
-        } else {
-            throw new IllegalArgumentException("Container context is not a activity");
-        }
-    }
-
-    public static void addFragmentInside(@NonNull final ViewGroup viewGroup,
-        @IdRes final int resId, @NonNull final Fragment fragment) {
-        if (viewGroup.getContext() instanceof AppCompatActivity) {
-            addFragmentInside(viewGroup, (AppCompatActivity) viewGroup.getContext(), resId, fragment);
-        } else {
-            throw new IllegalArgumentException("Container context is not a activity");
-        }
-    }
-
-    @Nullable
-    public static <T extends Fragment> T getFragmentByTag(@NonNull final FragmentManager manager,
-        @NonNull final String tag, @NonNull final Class<T> fragmentClass) {
-        final Fragment fragment = getFragmentByTag(manager, tag);
-        if (fragmentClass.isInstance(fragment)) {
-            return fragmentClass.cast(fragment);
-        }
-        return null;
-    }
-
     @Nullable
     public static Fragment getFragmentByTag(@NonNull final FragmentManager manager, @NonNull final String tag) {
         final Fragment fragment = manager.findFragmentByTag(tag);
@@ -84,32 +51,6 @@ public final class FragmentUtil {
 
     public static boolean isFragmentVisible(@NonNull final FragmentManager manager, @NonNull final String tag) {
         return getFragmentByTag(manager, tag) != null;
-    }
-
-    private static void addFragmentInside(@NonNull final ViewGroup viewGroup,
-        @NonNull final AppCompatActivity context,
-        @IdRes final int resId,
-        @NonNull final String zClassFragmentName,
-        @Nullable final Bundle topArgs) {
-
-        final Fragment fragment = FragmentUtil.createInstance(zClassFragmentName);
-        fragment.setArguments(topArgs);
-
-        addFragmentInside(viewGroup, context, resId, fragment);
-    }
-
-    private static void addFragmentInside(@NonNull final ViewGroup viewGroup,
-        @NonNull final AppCompatActivity context,
-        @IdRes final int resId,
-        @NonNull final Fragment fragment) {
-
-        final FrameLayout frameLayout = new FrameLayout(context);
-        frameLayout.setId(resId);
-        viewGroup.addView(frameLayout);
-        context.getSupportFragmentManager()
-            .beginTransaction()
-            .replace(resId, fragment)
-            .commit();
     }
 
     @NonNull

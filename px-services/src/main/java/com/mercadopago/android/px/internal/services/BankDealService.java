@@ -7,10 +7,6 @@ import java.util.List;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-/**
- * Created by mromar on 10/20/17.
- */
-
 public interface BankDealService {
 
     @GET("/v1/payment_methods/deals")

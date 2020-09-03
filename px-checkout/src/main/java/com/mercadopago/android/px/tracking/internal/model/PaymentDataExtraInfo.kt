@@ -2,10 +2,12 @@ package com.mercadopago.android.px.tracking.internal.model
 
 import com.mercadopago.android.px.model.PaymentData
 
-class PaymentDataExtraInfo private constructor(selectedInstallment: PayerCostInfo?,
-                                               cardId: String?,
-                                               hasEsc: Boolean,
-                                               issuerId: Long?) : TrackingMapModel() {
+class PaymentDataExtraInfo private constructor(
+    selectedInstallment: PayerCostInfo?,
+    cardId: String?,
+    hasEsc: Boolean,
+    issuerId: Long?
+) : TrackingMapModel() {
 
     companion object {
         @JvmStatic
@@ -15,10 +17,10 @@ class PaymentDataExtraInfo private constructor(selectedInstallment: PayerCostInf
             val issuerId = paymentData.issuer?.id
 
             return PaymentDataExtraInfo(
-                    payerCost?.let { PayerCostInfo(it) },
-                    token?.cardId,
-                    token?.esc != null,
-                    issuerId)
+                payerCost?.let { PayerCostInfo(it) },
+                token?.cardId,
+                token?.esc != null,
+                issuerId)
         }
     }
 }

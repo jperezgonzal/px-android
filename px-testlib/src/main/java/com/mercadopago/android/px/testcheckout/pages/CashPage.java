@@ -1,14 +1,9 @@
 package com.mercadopago.android.px.testcheckout.pages;
 
-import android.view.View;
 import com.mercadopago.android.px.testcheckout.assertions.CheckoutValidator;
 import com.mercadopago.android.testlib.pages.PageObject;
-import org.hamcrest.Matcher;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
-
+@Deprecated
 public class CashPage extends PageObject<CheckoutValidator> {
 
     public CashPage() {
@@ -20,8 +15,6 @@ public class CashPage extends PageObject<CheckoutValidator> {
     }
 
     public ReviewAndConfirmPage selectMethod(final String paymentMethodName) {
-        Matcher<View> paymentCell = withText(paymentMethodName);
-        onView(paymentCell).perform(click());
         return new ReviewAndConfirmPage(validator);
     }
 

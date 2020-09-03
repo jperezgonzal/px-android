@@ -4,17 +4,12 @@ import androidx.annotation.NonNull;
 import com.mercadopago.android.px.addons.model.EscDeleteReason;
 import com.mercadopago.android.px.model.Cause;
 import com.mercadopago.android.px.model.exceptions.ApiException;
-import com.mercadopago.android.px.model.exceptions.MercadoPagoError;
 import com.mercadopago.android.px.tracking.internal.model.Reason;
 import java.util.List;
 
 public final class TokenErrorWrapper {
 
     private final String tokenError;
-
-    public TokenErrorWrapper(@NonNull final MercadoPagoError error) {
-        tokenError = error.isApiException() ? getTokenErrorFrom(error.getApiException()) : null;
-    }
 
     public TokenErrorWrapper(@NonNull final ApiException apiException) {
         tokenError = getTokenErrorFrom(apiException);

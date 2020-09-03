@@ -33,7 +33,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
 import com.mercadolibre.android.picassodiskcache.PicassoDiskLoader;
 import com.mercadopago.android.px.R;
 import com.mercadopago.android.px.internal.font.FontHelper;
@@ -169,27 +168,6 @@ public final class ViewUtils {
         final InputMethodManager imm =
             (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
-    }
-
-    public static void showProgressLayout(final Activity activity) {
-        showLayout(activity, true, false);
-    }
-
-    public static void showRegularLayout(final Activity activity) {
-        showLayout(activity, false, true);
-    }
-
-    private static void showLayout(final Activity activity, final boolean showProgress, final boolean showLayout) {
-        final View form = activity.findViewById(R.id.mpsdkRegularLayout);
-        final View progress = activity.findViewById(R.id.mpsdkProgressLayout);
-
-        if (progress != null) {
-            progress.setVisibility(showLayout ? GONE : VISIBLE);
-        }
-
-        if (form != null) {
-            form.setVisibility(showProgress ? GONE : VISIBLE);
-        }
     }
 
     public static void resizeViewGroupLayoutParams(final ViewGroup viewGroup, final int height, final int width) {

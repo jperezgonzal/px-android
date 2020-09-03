@@ -5,11 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.core.util.Pair;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.core.util.Pair;
-import android.widget.Toast;
 import com.mercadopago.SampleDialog;
 import com.mercadopago.SampleTopFragment;
 import com.mercadopago.android.px.configuration.AdvancedConfiguration;
@@ -55,7 +55,6 @@ public final class ExamplesUtils {
 
     public static void resolveCheckoutResult(final Activity context, final int requestCode, final int resultCode,
         final Intent data, final int reqCodeCheckout) {
-        ViewUtils.showRegularLayout(context);
 
         if (requestCode == reqCodeCheckout) {
             if (resultCode == MercadoPagoCheckout.PAYMENT_RESULT_CODE) {

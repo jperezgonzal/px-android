@@ -33,4 +33,3 @@ public abstract class TaggedCallback<T> extends Callback<T> {
 
     public abstract void onFailure(MercadoPagoError error);
 }
-

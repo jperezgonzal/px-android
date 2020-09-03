@@ -39,7 +39,5 @@ internal interface OfflineMethods {
             return expressMetadataList.filter { express -> express.status.run { isActive &&  isEnabled } }
                 .run { size == 1 && get(0).isOfflineMethods }
         }
-
     }
-
 }

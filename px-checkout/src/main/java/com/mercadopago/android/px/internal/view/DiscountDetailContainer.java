@@ -9,7 +9,6 @@ import com.mercadopago.android.px.internal.viewmodel.DiscountDetailModel;
 import com.mercadopago.android.px.internal.viewmodel.DiscountHeader;
 import com.mercadopago.android.px.model.TextUrl;
 
-
 public class DiscountDetailContainer {
 
     private final DiscountDetailModel discountDetailModel;

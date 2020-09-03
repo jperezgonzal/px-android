@@ -1,6 +1,5 @@
 package com.mercadopago.android.px.internal.features.express.add_new_card;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,25 +15,21 @@ import com.mercadopago.android.px.R;
 import com.mercadopago.android.px.internal.base.BaseFragment;
 import com.mercadopago.android.px.internal.di.CheckoutConfigurationModule;
 import com.mercadopago.android.px.internal.di.Session;
-import com.mercadopago.android.px.internal.features.checkout.CheckoutActivity;
 import com.mercadopago.android.px.internal.features.express.ExpressPaymentFragment;
-import com.mercadopago.android.px.internal.features.payment_vault.PaymentVaultActivity;
 import com.mercadopago.android.px.internal.util.CardFormWithFragmentWrapper;
 import com.mercadopago.android.px.internal.util.ViewUtils;
 import com.mercadopago.android.px.internal.view.MPTextView;
 import com.mercadopago.android.px.internal.viewmodel.drawables.OtherPaymentMethodFragmentItem;
 import com.mercadopago.android.px.model.NewCardMetadata;
 import com.mercadopago.android.px.model.OfflinePaymentTypesMetadata;
-import com.mercadopago.android.px.model.PaymentMethodSearchItem;
 import com.mercadopago.android.px.model.internal.Text;
+import kotlin.Unit;
 
 import static com.mercadopago.android.px.internal.util.AccessibilityUtilsKt.executeIfAccessibilityTalkBackEnable;
 
 public class OtherPaymentMethodFragment
     extends BaseFragment<OtherPaymentMethodPresenter, OtherPaymentMethodFragmentItem>
     implements AddNewCard.View {
-
-    private static final String OLD_VERSION = "v1";
 
     private View addNewCardView;
     private View offPaymentMethodView;
@@ -48,13 +43,9 @@ public class OtherPaymentMethodFragment
 
     @Override
     protected OtherPaymentMethodPresenter createPresenter() {
-        if (model.getNewCardMetadata() != null && OLD_VERSION.equals(model.getNewCardMetadata().getVersion())) {
-            return new AddNewCardOldPresenter(Session.getInstance().getInitRepository());
-        } else {
-            final CheckoutConfigurationModule configurationModule = Session.getInstance().getConfigurationModule();
-            return new OtherPaymentMethodPresenter(
-                configurationModule.getPaymentSettings(), configurationModule.getTrackingRepository());
-        }
+        final CheckoutConfigurationModule configurationModule = Session.getInstance().getConfigurationModule();
+        return new OtherPaymentMethodPresenter(
+            configurationModule.getPaymentSettings(), configurationModule.getTrackingRepository());
     }
 
     @Nullable
@@ -116,7 +107,7 @@ public class OtherPaymentMethodFragment
         view.setOnClickListener(listener);
         executeIfAccessibilityTalkBackEnable(view.getContext(), () -> {
             view.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            return null;
+            return Unit.INSTANCE;
         });
     }
 
@@ -128,11 +119,12 @@ public class OtherPaymentMethodFragment
 
         if (presenter != null && parent != null) {
             executeIfAccessibilityTalkBackEnable(parent.getContext(), () -> {
-                int modeForAccessibility = isVisibleToUser ? View.IMPORTANT_FOR_ACCESSIBILITY_YES : View.IMPORTANT_FOR_ACCESSIBILITY_NO;
+                final int modeForAccessibility =
+                    isVisibleToUser ? View.IMPORTANT_FOR_ACCESSIBILITY_YES : View.IMPORTANT_FOR_ACCESSIBILITY_NO;
                 parent.performAccessibilityAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
                 offPaymentMethodView.setImportantForAccessibility(modeForAccessibility);
                 addNewCardView.setImportantForAccessibility(modeForAccessibility);
-                return null;
+                return Unit.INSTANCE;
             });
         }
     }
@@ -154,23 +146,10 @@ public class OtherPaymentMethodFragment
 
     @Override
     public void startCardForm(@NonNull final CardFormWithFragmentWrapper cardFormWithFragmentWrapper) {
-        FragmentManager manager;
+        final FragmentManager manager;
         if (getParentFragment() != null && (manager = getParentFragment().getFragmentManager()) != null) {
             cardFormWithFragmentWrapper.getCardFormWithFragment()
                 .start(manager, ExpressPaymentFragment.REQ_CODE_CARD_FORM, R.id.one_tap_fragment);
-        }
-    }
-
-    @Override
-    public void showPaymentMethods(@Nullable final PaymentMethodSearchItem paymentMethodSearchItem) {
-        final Activity activity = getActivity();
-        if (activity != null) {
-            if (paymentMethodSearchItem == null) {
-                PaymentVaultActivity.start(activity, CheckoutActivity.REQ_PAYMENT_VAULT);
-            } else {
-                PaymentVaultActivity.startWithPaymentMethodSelected(
-                    activity, CheckoutActivity.REQ_PAYMENT_VAULT, paymentMethodSearchItem);
-            }
         }
     }
 

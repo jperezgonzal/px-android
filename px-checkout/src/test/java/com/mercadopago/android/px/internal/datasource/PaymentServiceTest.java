@@ -1,9 +1,9 @@
 package com.mercadopago.android.px.internal.datasource;
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Observer;
 import com.mercadopago.android.px.KArgumentCaptor;
 import com.mercadopago.android.px.addons.ESCManagerBehaviour;
@@ -22,11 +22,9 @@ import com.mercadopago.android.px.internal.repository.InitRepository;
 import com.mercadopago.android.px.internal.repository.InstructionsRepository;
 import com.mercadopago.android.px.internal.repository.PayerCostSelectionRepository;
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository;
-import com.mercadopago.android.px.internal.repository.PluginRepository;
 import com.mercadopago.android.px.internal.repository.TokenRepository;
 import com.mercadopago.android.px.internal.repository.UserSelectionRepository;
 import com.mercadopago.android.px.internal.viewmodel.SplitSelectionState;
-import com.mercadopago.android.px.internal.viewmodel.mappers.PaymentMethodMapper;
 import com.mercadopago.android.px.mocks.InitResponseStub;
 import com.mercadopago.android.px.model.AmountConfiguration;
 import com.mercadopago.android.px.model.Card;
@@ -80,7 +78,6 @@ public class PaymentServiceTest {
     @Rule
     public InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
 
-    @Mock private PluginRepository pluginRepository;
     @Mock private UserSelectionRepository userSelectionRepository;
     @Mock private PaymentSettingRepository paymentSettingRepository;
     @Mock private DisabledPaymentMethodService disabledPaymentMethodService;
@@ -113,7 +110,6 @@ public class PaymentServiceTest {
         paymentService = new PaymentService(userSelectionRepository,
             paymentSettingRepository,
             disabledPaymentMethodService,
-            pluginRepository,
             discountRepository,
             amountRepository,
             context,

@@ -5,20 +5,17 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.graphics.PorterDuff;
 import android.os.Build;
-import androidx.core.content.ContextCompat;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import androidx.core.content.ContextCompat;
 import com.mercadopago.android.px.R;
 import com.mercadopago.android.px.internal.features.uicontrollers.card.BackCardView;
-import com.mercadopago.android.px.internal.features.uicontrollers.card.CardView;
-import com.mercadopago.android.px.internal.features.uicontrollers.card.IdentificationCardView;
 
 public final class MPAnimationUtils {
 
@@ -255,63 +252,5 @@ public final class MPAnimationUtils {
 
         animBack.start();
         animFront.start();
-    }
-
-    public static void transitionCardAppear(final Context context, final CardView cardView,
-        final IdentificationCardView identificationCardView) {
-
-        final Animation animAppear = AnimationUtils.loadAnimation(context, R.anim.px_appear_from_right);
-        final Animation animDisappear = AnimationUtils.loadAnimation(context, R.anim.px_dissapear_to_left);
-
-        cardView.getView().startAnimation(animDisappear);
-
-        animAppear.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(final Animation animation) {
-                //Do something
-            }
-
-            @Override
-            public void onAnimationEnd(final Animation animation) {
-                cardView.hide();
-            }
-
-            @Override
-            public void onAnimationRepeat(final Animation animation) {
-                //Do something
-            }
-        });
-
-        identificationCardView.getView().startAnimation(animAppear);
-        identificationCardView.show();
-    }
-
-    public static void transitionCardDisappear(final Context context, final CardView cardView,
-        final IdentificationCardView identificationCardView) {
-
-        final Animation animAppear = AnimationUtils.loadAnimation(context, R.anim.px_appear_from_left);
-        final Animation animDisappear = AnimationUtils.loadAnimation(context, R.anim.px_dissapear_to_right);
-
-        identificationCardView.getView().startAnimation(animDisappear);
-
-        animAppear.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(final Animation animation) {
-                //Do something
-            }
-
-            @Override
-            public void onAnimationEnd(final Animation animation) {
-                identificationCardView.hide();
-            }
-
-            @Override
-            public void onAnimationRepeat(final Animation animation) {
-                //Do something
-            }
-        });
-
-        cardView.getView().startAnimation(animAppear);
-        cardView.show();
     }
 }

@@ -64,7 +64,3 @@
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
 ######################## Retrofit ########################
-
--keepclassmembers public class * extends com.mercadopago.android.px.internal.view.Renderer {
-   public <init>(...);
-}

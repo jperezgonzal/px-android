@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import com.mercadopago.android.px.internal.repository.AmountConfigurationRepository;
 import com.mercadopago.android.px.internal.repository.AmountRepository;
 import com.mercadopago.android.px.internal.repository.DisabledPaymentMethodRepository;
+import com.mercadopago.android.px.internal.repository.PaymentSettingRepository;
 import com.mercadopago.android.px.internal.view.PaymentMethodDescriptorView;
 import com.mercadopago.android.px.internal.viewmodel.AccountMoneyDescriptorModel;
 import com.mercadopago.android.px.internal.viewmodel.CreditCardDescriptorModel;
@@ -19,16 +20,16 @@ import com.mercadopago.android.px.model.internal.Text;
 
 public class PaymentMethodDescriptorMapper extends Mapper<ExpressMetadata, PaymentMethodDescriptorView.Model> {
 
-    @NonNull private final Currency currency;
+    @NonNull private final PaymentSettingRepository paymentSettings;
     @NonNull private final AmountConfigurationRepository amountConfigurationRepository;
     @NonNull private final DisabledPaymentMethodRepository disabledPaymentMethodRepository;
     @NonNull private final AmountRepository amountRepository;
 
-    public PaymentMethodDescriptorMapper(@NonNull final Currency currency,
+    public PaymentMethodDescriptorMapper(@NonNull final PaymentSettingRepository paymentSettings,
         @NonNull final AmountConfigurationRepository amountConfigurationRepository,
         @NonNull final DisabledPaymentMethodRepository disabledPaymentMethodRepository,
         @NonNull final AmountRepository amountRepository) {
-        this.currency = currency;
+        this.paymentSettings = paymentSettings;
         this.amountConfigurationRepository = amountConfigurationRepository;
         this.disabledPaymentMethodRepository = disabledPaymentMethodRepository;
         this.amountRepository = amountRepository;
@@ -38,6 +39,7 @@ public class PaymentMethodDescriptorMapper extends Mapper<ExpressMetadata, Payme
     public PaymentMethodDescriptorView.Model map(@NonNull final ExpressMetadata expressMetadata) {
         final String paymentTypeId = expressMetadata.getPaymentTypeId();
         final String customOptionId = expressMetadata.getCustomOptionId();
+        final Currency currency = paymentSettings.getCurrency();
 
         if (disabledPaymentMethodRepository.hasPaymentMethodId(customOptionId)) {
             return DisabledPaymentMethodDescriptorModel.createFrom(expressMetadata.getStatus().getMainMessage());
@@ -62,7 +64,7 @@ public class PaymentMethodDescriptorMapper extends Mapper<ExpressMetadata, Payme
         final InterestFree interestFree =
             expressMetadata.hasBenefits() ? expressMetadata.getBenefits().getInterestFree() : null;
         return CreditCardDescriptorModel
-            .createFrom(currency, installmentsRightHeader, interestFree,
+            .createFrom(paymentSettings.getCurrency(), installmentsRightHeader, interestFree,
                 amountConfigurationRepository.getConfigurationFor(expressMetadata.getCustomOptionId()));
     }
 }
