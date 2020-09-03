@@ -75,13 +75,9 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             buttonTextLiveData.observe(viewLifecycleOwner,
                 Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
             cvvRequiredLiveData.observe(viewLifecycleOwner,
-                    Observer { pair -> pair?.let {
-                        showSecurityCodeScreen(newInstance(it.first, it.second)) }
-                    })
+                    Observer { pair -> pair?.let { showSecurityCodeScreen(newInstance(it.first, it.second)) } })
             recoverRequiredLiveData.observe(viewLifecycleOwner,
-                Observer { pair -> pair?.let {
-                    showSecurityCodeScreen(newInstance(it.first, it.second))
-                } })
+                Observer { pair -> pair?.let { showSecurityCodeScreen(newInstance(it.first, it.second)) } })
             stateUILiveData.observe(viewLifecycleOwner, Observer { state -> state?.let { onStateUIChanged(it) } })
         }
     }
@@ -182,6 +178,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     }
 
     private fun finishLoading(params: ExplodeDecorator) {
+        ViewUtils.hideKeyboard(activity)
         childFragmentManager.findFragmentByTag(ExplodingFragment.TAG)
             ?.let { (it as ExplodingFragment).finishLoading(params) }
             ?: viewModel.hasFinishPaymentAnimation()
