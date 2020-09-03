@@ -9,12 +9,10 @@ class PaymentRecovery(private val statusDetail: String, val token: Token?, val c
                       val paymentMethod: PaymentMethod?) : Serializable, Parcelable {
 
     @Deprecated("")
-    constructor(paymentStatusDetail: String) : this(paymentStatusDetail, null, null) {
-    }
+    constructor(paymentStatusDetail: String) : this(paymentStatusDetail, null, null)
 
     @Deprecated("")
-    constructor(statusDetail: String, token: Token) : this(statusDetail, token, null) {
-    }
+    constructor(statusDetail: String, token: Token) : this(statusDetail, token, null)
 
     @Deprecated("")
     constructor(statusDetail: String, token: Token?, card: Card?) : this(statusDetail, token, card, null)
@@ -43,22 +41,15 @@ class PaymentRecovery(private val statusDetail: String, val token: Token?, val c
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(statusDetail)
+        parcel.writeSerializable(token)
         parcel.writeParcelable(card, flags)
         parcel.writeParcelable(paymentMethod, flags)
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents() = 0
 
     companion object CREATOR : Parcelable.Creator<PaymentRecovery> {
-        override fun createFromParcel(parcel: Parcel): PaymentRecovery {
-            return PaymentRecovery(parcel)
-        }
-
-        override fun newArray(size: Int): Array<PaymentRecovery?> {
-            return arrayOfNulls(size)
-        }
+        override fun createFromParcel(parcel: Parcel) = PaymentRecovery(parcel)
+        override fun newArray(size: Int) = arrayOfNulls<PaymentRecovery>(size)
     }
-
 }

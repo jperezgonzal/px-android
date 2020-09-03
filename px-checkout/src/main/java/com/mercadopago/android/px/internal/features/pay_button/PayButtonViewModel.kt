@@ -87,7 +87,7 @@ internal class PayButtonViewModel(
         if (connectionHelper.checkConnection()) {
             handler?.prePayment(object : OnReadyForPaymentCallback {
                 override fun call(paymentConfiguration: PaymentConfiguration, confirmTrackerData: ConfirmData?) {
-                    if(paymentConfiguration.customOptionId.isNotNullNorEmpty()) {
+                    if (paymentConfiguration.customOptionId.isNotNullNorEmpty()) {
                         paymentSettingRepository.clearToken()
                     }
                     startSecuredPayment(paymentConfiguration, confirmTrackerData)
@@ -168,7 +168,9 @@ internal class PayButtonViewModel(
         val recoverRequiredLiveData: LiveData<PaymentRecovery?> =
             transform(serviceLiveData.recoverInvalidEscLiveData) { it.takeIf { it.shouldAskForCvv() } }
         this.recoverRequiredLiveData.addSource(recoverRequiredLiveData) { value ->
-            this.recoverRequiredLiveData.value = Pair(paymentConfiguration!!, value!!)
+            value?.let {
+                paymentRecovery -> this.recoverRequiredLiveData.value = Pair(paymentConfiguration!!, paymentRecovery)
+            }
             stateUILiveData.value = ButtonLoadingCanceled
         }
     }

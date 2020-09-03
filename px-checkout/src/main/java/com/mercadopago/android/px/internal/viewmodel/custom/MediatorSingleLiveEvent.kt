@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 internal class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
 
-    private val mPending: AtomicBoolean = AtomicBoolean(false)
+    private val pending: AtomicBoolean = AtomicBoolean(false)
 
     @MainThread
     override fun observe(owner: LifecycleOwner, observer: Observer<in T?>) {
@@ -19,7 +19,7 @@ internal class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
         }
 
         super.observe(owner, Observer { value ->
-            if (mPending.compareAndSet(true, false)) {
+            if (pending.compareAndSet(true, false)) {
                 observer.onChanged(value);
             }
         })
@@ -27,7 +27,7 @@ internal class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
 
     @MainThread
     override fun setValue(value: T?) {
-        mPending.set(true)
+        pending.set(true)
         super.setValue(value)
     }
 
