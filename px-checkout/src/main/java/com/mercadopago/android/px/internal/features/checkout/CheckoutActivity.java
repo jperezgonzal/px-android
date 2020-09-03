@@ -158,8 +158,10 @@ public class CheckoutActivity extends PXActivity<CheckoutPresenter>
 
             fragment = fragmentManager.findFragmentByTag(SecurityCodeFragment.TAG);
 
-            if (fragment != null) {
+            if (earlyExitFromBackHandler(fragment)) {
                 fragmentManager.popBackStack();
+                return;
+            } else if (fragment != null) {
                 return;
             }
 

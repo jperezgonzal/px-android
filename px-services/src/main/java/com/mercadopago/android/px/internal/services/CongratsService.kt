@@ -17,7 +17,7 @@ interface CongratsService {
         @Query("payment_methods_ids") paymentMethodsIds: String,
         @Query("flow_name") flowName: String): CongratsResponse
 
-    @POST("{environment}/px_mobile/v1/remedies/{payment_id}")
+    @POST("{environment}/px_mobile/v1/remedies1121/{payment_id}")
     suspend fun getRemedies(
         @Path(value = "environment", encoded = true) environment: String,
         @Path(value = "payment_id", encoded = true) paymentId: String,

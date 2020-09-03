@@ -16,22 +16,23 @@ internal class ViewModelFactory : ViewModelProvider.Factory {
         val session = Session.getInstance()
         if (modelClass.isAssignableFrom(PayButtonViewModel::class.java)) {
             return PayButtonViewModel(session.paymentRepository,
-                    session.configurationModule.productIdProvider,
+                session.configurationModule.productIdProvider,
                 ConnectionHelper.instance,
-                    session.configurationModule.paymentSettings,
-                    session.configurationModule.customTextsRepository) as T
-        } else if(modelClass.isAssignableFrom(OfflineMethodsViewModel::class.java)) {
+                session.configurationModule.paymentSettings,
+                session.configurationModule.customTextsRepository) as T
+        } else if (modelClass.isAssignableFrom(OfflineMethodsViewModel::class.java)) {
             return OfflineMethodsViewModel(session.initRepository,
-                    session.configurationModule.paymentSettings,
-                    session.amountRepository,
-                    session.discountRepository) as T
-        } else if(modelClass.isAssignableFrom(SecurityCodeViewModel::class.java)) {
-            return SecurityCodeViewModel(session.initRepository,
-                    session.configurationModule.userSelectionRepository,
-                    session.cardTokenRepository,
-                    session.mercadoPagoESC,
-                    session.configurationModule.paymentSettings,
-                    CardConfigurationMapper()) as T
+                session.configurationModule.paymentSettings,
+                session.amountRepository,
+                session.discountRepository) as T
+        } else if (modelClass.isAssignableFrom(SecurityCodeViewModel::class.java)) {
+            return SecurityCodeViewModel(
+                session.cardTokenRepository,
+                session.mercadoPagoESC,
+                session.configurationModule.paymentSettings,
+                session.initRepository,
+                session.configurationModule.userSelectionRepository,
+                CardConfigurationMapper()) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

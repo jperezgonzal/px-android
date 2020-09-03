@@ -442,7 +442,7 @@ public final class OneTapSamples {
             new Item.Builder("Product title", 1, new BigDecimal(amount))
                 .build();
         items.add(item);
-        return new CheckoutPreference.Builder(Sites.ARGENTINA,
+        return new CheckoutPreference.Builder(Sites.BRASIL,
             PAYER_EMAIL_DUMMY, items)
             .addExcludedPaymentTypes(excludedPaymentTypes)
             .setDefaultInstallments(defaultInstallments)
@@ -459,7 +459,7 @@ public final class OneTapSamples {
             getCheckoutPreferenceWithPayerEmail(excludedPaymentTypes, 120, 1);
         return new MercadoPagoCheckout.Builder(SAVED_CARD_MERCHANT_PUBLIC_KEY_1, checkoutPreferenceWithPayerEmail,
             PaymentConfigurationUtils.create(samplePaymentProcessor))
-            .setPrivateKey(SAVED_CARD_PAYER_PRIVATE_KEY_1)
+            .setPrivateKey("APP_USR-6214141258444279-011719-114e3bc3e8881e5125aa8c8ad34165e2-515501708")
             .setAdvancedConfiguration(new AdvancedConfiguration.Builder().setExpressPaymentEnable(true).build());
     }
 

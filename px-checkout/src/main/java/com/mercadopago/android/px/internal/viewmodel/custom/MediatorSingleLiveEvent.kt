@@ -7,7 +7,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import java.util.concurrent.atomic.AtomicBoolean
 
-class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
+internal class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
 
     private val mPending: AtomicBoolean = AtomicBoolean(false)
 
@@ -40,6 +40,6 @@ class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
     }
 
     companion object {
-        private const val TAG = "SingleLiveEvent"
+        private const val TAG = "MediatorSingleLiveEvent"
     }
 }

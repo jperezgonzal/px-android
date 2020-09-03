@@ -248,7 +248,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     companion object {
         const val TAG = "TAG_BUTTON_FRAGMENT"
         const val REQ_CODE_CONGRATS = 300
-        private const val REQ_CODE_SECURITY_CODE = 301
         private const val REQ_CODE_PAYMENT_PROCESSOR = 302
         private const val REQ_CODE_BIOMETRICS = 303
         private const val EXTRA_STATE = "extra_state"
