@@ -28,7 +28,8 @@ class SecurityCodeViewModel(
     private val paymentSettingRepository: PaymentSettingRepository,
     initRepository: InitRepository,
     userSelectionRepository: UserSelectionRepository,
-    cardConfigurationMapper: CardConfigurationMapper) : BaseViewModel() {
+    cardConfigurationMapper: CardConfigurationMapper,
+    virtualCardInfoMapper: VirtualCardInfoMapper) : BaseViewModel() {
 
     val cvvCardUiLiveData = MutableLiveData<CardDrawerConfiguration>()
     val virtualCardInfoLiveData = MutableLiveData<VirtualCardInfo>()
@@ -42,7 +43,7 @@ class SecurityCodeViewModel(
 
     init {
         cvvInfo?.let {
-            virtualCardInfoLiveData.value = VirtualCardInfo(it.title, it.message)
+            virtualCardInfoLiveData.value = virtualCardInfoMapper.map(it)
         } ?: CoroutineScope(Dispatchers.IO).launch {
             val initResponse = initRepository.loadInitResponse()
             val cardDisplayInfo = initResponse?.let { response ->

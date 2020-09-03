@@ -137,6 +137,6 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
     }
 
     override fun handleBack(): Boolean {
-        return !payButtonFragment.isExploding()
+        return payButtonFragment.isExploding()
     }
 }
