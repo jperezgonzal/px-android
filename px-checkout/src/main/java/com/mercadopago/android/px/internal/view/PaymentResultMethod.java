@@ -1,16 +1,15 @@
 package com.mercadopago.android.px.internal.view;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import com.mercadopago.android.px.R;
+import com.mercadopago.android.px.internal.extensions.ImageViewExtensionsKt;
 import com.mercadopago.android.px.internal.util.PaymentDataHelper;
-import com.mercadopago.android.px.internal.util.ResourceUtil;
 import com.mercadopago.android.px.internal.util.TextUtil;
 import com.mercadopago.android.px.internal.util.ViewUtils;
 import com.mercadopago.android.px.model.Currency;
@@ -52,8 +51,7 @@ public class PaymentResultMethod extends ConstraintLayout {
     }
 
     public void setModel(@NonNull final Model model) {
-        icon.setImageResource(ResourceUtil.getIconResource(getContext(), model.paymentMethodId));
-
+        ImageViewExtensionsKt.loadOrElse(icon, model.imageUrl, R.drawable.px_generic_method);
         ViewUtils.loadOrGone(getDescription(model), description);
         ViewUtils.loadOrHide(View.GONE, model.paymentMethodDescription, paymentMethodStatement);
         ViewUtils.loadOrGone(getStatement(model), statement);
@@ -76,7 +74,7 @@ public class PaymentResultMethod extends ConstraintLayout {
                 model.paymentMethodName,
                 getResources().getString(R.string.px_ending_in),
                 model.lastFourDigits);
-        } else if(!PaymentTypes.isAccountMoney(model.paymentTypeId)){
+        } else if (!PaymentTypes.isAccountMoney(model.paymentTypeId)) {
             return model.paymentMethodName;
         }
         return null;
@@ -94,12 +92,13 @@ public class PaymentResultMethod extends ConstraintLayout {
 
     public static final class Model {
 
-        public static Model with(@NonNull final PaymentData paymentData, @NonNull final Currency currency) {
-            return with(paymentData, currency, null);
+        public static Model with(@Nullable final String imageUrl, @NonNull final PaymentData paymentData,
+            @NonNull final Currency currency) {
+            return with(imageUrl, paymentData, currency, null);
         }
 
-        public static Model with(@NonNull final PaymentData paymentData, @NonNull final Currency currency,
-            @Nullable final String statement) {
+        public static Model with(@Nullable final String imageUrl, @NonNull final PaymentData paymentData,
+            @NonNull final Currency currency, @Nullable final String statement) {
 
             final PaymentResultAmount.Model amountModel = new PaymentResultAmount.Model.Builder(
                 PaymentDataHelper.getPrettyAmountToPay(paymentData), paymentData.getRawAmount(), currency)
@@ -110,7 +109,7 @@ public class PaymentResultMethod extends ConstraintLayout {
             final PaymentMethod paymentMethod = paymentData.getPaymentMethod();
             final Text description =
                 paymentMethod.getDisplayInfo() != null ? paymentMethod.getDisplayInfo().getDescription() : Text.EMPTY;
-            return new Builder(paymentMethod.getId(), paymentMethod.getName(), description,
+            return new Builder(imageUrl, paymentMethod.getName(), description,
                 paymentMethod.getPaymentTypeId())
                 .setLastFourDigits(paymentData.getToken() != null ? paymentData.getToken().getLastFourDigits() : null)
                 .setStatement(statement)
@@ -119,7 +118,7 @@ public class PaymentResultMethod extends ConstraintLayout {
                 .build();
         }
 
-        @NonNull /* default */ final String paymentMethodId;
+        @Nullable /* default */ final String imageUrl;
         @NonNull /* default */ final String paymentMethodName;
         @NonNull /* default */ final Text paymentMethodDescription;
         @NonNull /* default */ final String paymentTypeId;
@@ -129,7 +128,7 @@ public class PaymentResultMethod extends ConstraintLayout {
         @Nullable /* default */ final ResultInfo info;
 
         /* default */ Model(@NonNull final Builder builder) {
-            paymentMethodId = builder.paymentMethodId;
+            imageUrl = builder.imageUrl;
             paymentMethodName = builder.paymentMethodName;
             paymentMethodDescription = builder.paymentMethodDescription;
             paymentTypeId = builder.paymentTypeId;
@@ -140,7 +139,7 @@ public class PaymentResultMethod extends ConstraintLayout {
         }
 
         public static class Builder {
-            @NonNull /* default */ String paymentMethodId;
+            @Nullable /* default */ String imageUrl;
             @NonNull /* default */ String paymentMethodName;
             @NonNull /* default */ final Text paymentMethodDescription;
             @NonNull /* default */ String paymentTypeId;
@@ -149,9 +148,9 @@ public class PaymentResultMethod extends ConstraintLayout {
             @Nullable /* default */ String statement;
             @Nullable /* default */ ResultInfo info;
 
-            public Builder(@NonNull final String paymentMethodId, @NonNull final String paymentMethodName,
+            public Builder(@Nullable final String imageUrl, @NonNull final String paymentMethodName,
                 @NonNull final Text paymentMethodDescription, @NonNull final String paymentTypeId) {
-                this.paymentMethodId = paymentMethodId;
+                this.imageUrl = imageUrl;
                 this.paymentMethodName = paymentMethodName;
                 this.paymentMethodDescription = paymentMethodDescription;
                 this.paymentTypeId = paymentTypeId;

@@ -46,6 +46,7 @@ import com.mercadopago.android.px.internal.viewmodel.RecoverPaymentPostPaymentAc
 import com.mercadopago.android.px.internal.viewmodel.handlers.PaymentModelHandler;
 import com.mercadopago.android.px.model.exceptions.ApiException;
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError;
+import kotlin.Unit;
 
 import static android.content.Intent.FLAG_ACTIVITY_FORWARD_RESULT;
 import static com.mercadopago.android.px.internal.features.Constants.RESULT_ACTION;
@@ -89,10 +90,10 @@ public class PaymentResultActivity extends PXActivity<PaymentResultPresenter> im
         BaseExtensionsKt.addKeyBoardListener(this, () -> {
             footer.hideQuietButton();
             scrollView.fullScroll(View.FOCUS_DOWN);
-            return null;
+            return Unit.INSTANCE;
         }, () -> {
             footer.showQuietButton();
-            return null;
+            return Unit.INSTANCE;
         });
 
         presenter = createPresenter();

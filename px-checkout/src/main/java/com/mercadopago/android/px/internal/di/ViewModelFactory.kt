@@ -8,6 +8,7 @@ import com.mercadopago.android.px.internal.features.pay_button.PayButtonViewMode
 import com.mercadopago.android.px.internal.features.security_code.CardConfigurationMapper
 import com.mercadopago.android.px.internal.features.security_code.SecurityCodeViewModel
 import com.mercadopago.android.px.internal.features.security_code.VirtualCardInfoMapper
+import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 
 internal class ViewModelFactory : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
@@ -21,7 +22,8 @@ internal class ViewModelFactory : ViewModelProvider.Factory {
                     configurationModule.productIdProvider,
                     ConnectionHelper.instance,
                     configurationModule.paymentSettings,
-                    configurationModule.customTextsRepository)
+                    configurationModule.customTextsRepository,
+                    PayButtonViewModelMapper())
             }
             modelClass.isAssignableFrom(OfflineMethodsViewModel::class.java) -> {
                 OfflineMethodsViewModel(session.initRepository,
