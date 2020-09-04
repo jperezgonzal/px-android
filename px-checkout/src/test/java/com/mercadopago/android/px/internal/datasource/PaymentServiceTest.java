@@ -188,7 +188,7 @@ public class PaymentServiceTest {
 
     @Test
     public void whenSavedCardAndESCSavedThenAskTokenButFailApiCallThenCVVIsRequiered() {
-        final Observer<Event<Pair<Card, Reason>>> cvvRequiredObserver = mock(Observer.class);
+        final Observer<Event<Reason>> cvvRequiredObserver = mock(Observer.class);
         final Card card = savedCreditCardOneTapPresent(CARD_ID_ESC_APPROVED);
         when(escPaymentManager.hasEsc(card)).thenReturn(true);
         when(tokenRepository.createToken(card)).thenReturn(new StubFailMpCall(mock(ApiException.class)));
@@ -238,7 +238,7 @@ public class PaymentServiceTest {
 
     @Test
     public void whenOneTapPaymentWhenCapExceededThenAskCVV() {
-        final Observer<Event<Pair<Card, Reason>>> cvvRequiredObserver = mock(Observer.class);
+        final Observer<Event<Reason>> cvvRequiredObserver = mock(Observer.class);
         final Card card = savedCreditCardOneTapPresent(CARD_ID_ESC_REJECTED);
         when(escPaymentManager.hasEsc(card)).thenReturn(true);
         when(escManagerBehaviour.isESCEnabled()).thenReturn(true);
