@@ -189,4 +189,5 @@
         <item quantity="one">Will be accredited in {0} business day</item>
         <item quantity="other">Will be accredited in {0} business days</item>
     </plurals>
+    <string name="px_security_code_screen_title">Ingresa el código de seguridad</string>
 </resources>

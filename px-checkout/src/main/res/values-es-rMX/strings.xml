@@ -189,4 +189,5 @@
         <item quantity="one">Se acreditará en {0} día hábil</item>
         <item quantity="other">Se acreditará en {0} días hábiles</item>
     </plurals>
+    <string name="px_security_code_screen_title">Ingresa el código de seguridad</string>
 </resources>

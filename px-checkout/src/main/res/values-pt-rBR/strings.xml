@@ -189,4 +189,5 @@
         <item quantity="one" tools:ignore="ImpliedQuantity">Será aprovado em {0} dia útil</item>
         <item quantity="other">Será aprovado em {0} dias úteis</item>
     </plurals>
+    <string name="px_security_code_screen_title">Ingresa el código de seguridad</string>
 </resources>
