@@ -30,7 +30,6 @@ import com.mercadopago.android.px.internal.features.explode.ExplodingFragment
 import com.mercadopago.android.px.internal.features.payment_result.PaymentResultActivity
 import com.mercadopago.android.px.internal.features.plugins.PaymentProcessorActivity
 import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment
-import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment.Companion.newInstance
 import com.mercadopago.android.px.internal.util.FragmentUtil
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.view.OnSingleClickListener
@@ -75,9 +74,9 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             buttonTextLiveData.observe(viewLifecycleOwner,
                 Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
             cvvRequiredLiveData.observe(viewLifecycleOwner,
-                    Observer { pair -> pair?.let { showSecurityCodeScreen(newInstance(it.first, it.second)) } })
+                Observer { pair -> pair?.let { showSecurityCodeScreen(SecurityCodeFragment.newInstance(it.first, it.second)) } })
             recoverRequiredLiveData.observe(viewLifecycleOwner,
-                Observer { pair -> pair?.let { showSecurityCodeScreen(newInstance(it.first, it.second)) } })
+                Observer { pair -> pair?.let { showSecurityCodeScreen(SecurityCodeFragment.newInstance(it.first, it.second)) } })
             stateUILiveData.observe(viewLifecycleOwner, Observer { state -> state?.let { onStateUIChanged(it) } })
         }
     }
@@ -233,9 +232,9 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     private fun showSecurityCodeScreen(securityCodeFragment: SecurityCodeFragment) {
         activity?.supportFragmentManager?.apply {
             beginTransaction()
-                    .replace(R.id.one_tap_fragment, securityCodeFragment, SecurityCodeFragment.TAG)
-                    .addToBackStack(SecurityCodeFragment.TAG)
-                    .commitAllowingStateLoss()
+                .replace(R.id.one_tap_fragment, securityCodeFragment, SecurityCodeFragment.TAG)
+                .addToBackStack(SecurityCodeFragment.TAG)
+                .commitAllowingStateLoss()
         }
     }
 

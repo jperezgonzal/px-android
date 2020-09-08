@@ -64,7 +64,7 @@ class SecurityCodeViewModel(
         this.reason = reason
     }
 
-    fun handlePrePaymentFinished(callback: PayButton.OnReadyForPaymentCallback) {
+    fun handlePrepayment(callback: PayButton.OnReadyForPaymentCallback) {
         callback.call(paymentConfiguration)
     }
 
