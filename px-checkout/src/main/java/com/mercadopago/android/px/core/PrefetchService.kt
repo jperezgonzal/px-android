@@ -1,7 +1,6 @@
 package com.mercadopago.android.px.core
 
 import com.mercadopago.android.px.internal.di.Session
-import com.mercadopago.android.px.internal.services.Response
 import com.mercadopago.android.px.internal.util.ApiUtil
 import com.mercadopago.android.px.model.exceptions.ApiException
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
@@ -48,19 +47,8 @@ class PrefetchService(private val checkout: MercadoPagoCheckout, private val ses
     private fun initCall() {
         CoroutineScope(Dispatchers.IO).launch {
             session.init(checkout)
-            session.getPrefetchInitService(checkout).get().let {
-                when(it) {
-                    is Response.Success<*> -> {
-                        initResponse = it.result as InitResponse
-                        withContext(Dispatchers.Main) {
-                            success()
-                        }
-                    }
-                    is Response.Failure<*> -> withContext(Dispatchers.Main) {
-                        error(it.exception as ApiException?)
-                    }
-                }
-            }
+            val response = session.getPrefetchInitService(checkout).get()
+            withContext(Dispatchers.Main) { response.resolve(success = { success() }, error = { error(it) }) }
         }
     }
 

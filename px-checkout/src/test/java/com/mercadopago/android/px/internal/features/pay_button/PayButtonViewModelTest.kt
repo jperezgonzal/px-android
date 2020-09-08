@@ -158,7 +158,7 @@ internal class PayButtonViewModelTest: BasicRobolectricTest() {
 
         verify(paymentSettingService).configure(SecurityType.SECOND_FACTOR)
         verify(handler).enqueueOnExploding(callback.capture())
-        callback.value.failure()
+        callback.value.failure(mock(MercadoPagoError::class.java))
         verify(uiStateObserver).onChanged(any(UIProgress.ButtonLoadingCanceled::class.java))
     }
 

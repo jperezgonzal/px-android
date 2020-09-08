@@ -44,7 +44,7 @@ interface PayButton {
 
     interface OnEnqueueResolvedCallback {
         fun success()
-        fun failure()
+        fun failure(error: MercadoPagoError)
     }
 
     interface OnPaymentFinishedCallback {

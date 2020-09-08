@@ -25,7 +25,7 @@ import com.mercadopago.android.px.internal.util.SecurityValidationDataFactory
 import com.mercadopago.android.px.internal.viewmodel.BusinessPaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PostPaymentAction
-import com.mercadopago.android.px.internal.viewmodel.custom.MediatorSingleLiveEvent
+import com.mercadopago.android.px.internal.viewmodel.custom.MediatorSingleLiveData
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
@@ -49,6 +49,8 @@ internal class PayButtonViewModel(
 
     val buttonTextLiveData = MutableLiveData<ButtonConfig>()
     private var buttonConfig: ButtonConfig = payButtonViewModelMapper.map(customTextsRepository.customTexts)
+    private val connectivityError = MercadoPagoError(ApiUtil.getApiException(NoConnectivityException()), null)
+    private val connectionError = UIError.ConnectionError(connectivityError)
 
     init {
         buttonTextLiveData.value = buttonConfig
@@ -59,9 +61,9 @@ internal class PayButtonViewModel(
     private var paymentConfiguration: PaymentConfiguration? = null
     private var paymentModel: PaymentModel? = null
 
-    val cvvRequiredLiveData = MediatorSingleLiveEvent<Pair<PaymentConfiguration, Reason>?>()
-    val recoverRequiredLiveData = MediatorSingleLiveEvent<Pair<PaymentConfiguration, PaymentRecovery>>()
-    val stateUILiveData = MediatorSingleLiveEvent<PayButtonState>()
+    val cvvRequiredLiveData = MediatorSingleLiveData<Pair<PaymentConfiguration, Reason>?>()
+    val recoverRequiredLiveData = MediatorSingleLiveData<Pair<PaymentConfiguration, PaymentRecovery>>()
+    val stateUILiveData = MediatorSingleLiveData<PayButtonState>()
     private var observingService = false
 
     private fun <T : Event<X>, X : Any, I> transform(liveData: LiveData<T>, block: (content: X) -> I): LiveData<I?> {
@@ -126,8 +128,8 @@ internal class PayButtonViewModel(
                 confirmTrackerData?.let { ConfirmEvent(it).track() }
             }
 
-            override fun failure() {
-                stateUILiveData.value = (ButtonLoadingCanceled)
+            override fun failure(error: MercadoPagoError) {
+                stateUILiveData.value = UIError.BusinessError(error)
             }
         })
     }
@@ -217,16 +219,18 @@ internal class PayButtonViewModel(
     }
 
     private fun manageNoConnection() {
-        val exception = NoConnectivityException()
-        val apiException = ApiUtil.getApiException(exception)
-        val error = MercadoPagoError(apiException, null)
-        noRecoverableError(error)
+        trackNoRecoverableFriction(connectivityError)
+        stateUILiveData.value = connectionError
+    }
+
+    private fun trackNoRecoverableFriction(error: MercadoPagoError) {
+        FrictionEventTracker.with(OneTapViewTracker.PATH_REVIEW_ONE_TAP_VIEW,
+            FrictionEventTracker.Id.GENERIC, FrictionEventTracker.Style.CUSTOM_COMPONENT, error).track()
     }
 
     private fun noRecoverableError(error: MercadoPagoError) {
-        FrictionEventTracker.with(OneTapViewTracker.PATH_REVIEW_ONE_TAP_VIEW,
-            FrictionEventTracker.Id.GENERIC, FrictionEventTracker.Style.CUSTOM_COMPONENT, error).track()
-        stateUILiveData.value = UIError.ConnectionError(error)
+        trackNoRecoverableFriction(error)
+        stateUILiveData.value = UIError.BusinessError(error)
     }
 
     override fun hasFinishPaymentAnimation() {

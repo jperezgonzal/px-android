@@ -7,7 +7,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
+internal class MediatorSingleLiveData<T> : MediatorLiveData<T>() {
 
     private val pending: AtomicBoolean = AtomicBoolean(false)
 
@@ -20,7 +20,7 @@ internal class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
 
         super.observe(owner, Observer { value ->
             if (pending.compareAndSet(true, false)) {
-                observer.onChanged(value);
+                observer.onChanged(value)
             }
         })
     }

@@ -4,11 +4,13 @@ import com.mercadopago.android.px.addons.ESCManagerBehaviour
 import com.mercadopago.android.px.core.MercadoPagoCheckout
 import com.mercadopago.android.px.internal.services.CheckoutService
 import com.mercadopago.android.px.internal.services.Response
-import com.mercadopago.android.px.internal.services.awaitCallback
+import com.mercadopago.android.px.internal.callbacks.awaitCallback
 import com.mercadopago.android.px.internal.tracking.TrackingRepository
 import com.mercadopago.android.px.internal.util.JsonUtil
+import com.mercadopago.android.px.model.exceptions.ApiException
 import com.mercadopago.android.px.model.internal.CheckoutFeatures
 import com.mercadopago.android.px.model.internal.InitRequest
+import com.mercadopago.android.px.model.internal.InitResponse
 import java.util.*
 
 internal class PrefetchInitService(private val checkout: MercadoPagoCheckout,
@@ -16,7 +18,7 @@ internal class PrefetchInitService(private val checkout: MercadoPagoCheckout,
     private val escManagerBehaviour: ESCManagerBehaviour,
     private val trackingRepository: TrackingRepository) {
 
-    suspend fun get(): Response {
+    suspend fun get(): Response<InitResponse, ApiException> {
         val checkoutPreference = checkout.checkoutPreference
         val paymentConfiguration = checkout.paymentConfiguration
         val discountParamsConfiguration = checkout.advancedConfiguration.discountParamsConfiguration

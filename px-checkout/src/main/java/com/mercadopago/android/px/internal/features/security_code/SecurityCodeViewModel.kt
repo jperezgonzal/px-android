@@ -70,7 +70,7 @@ class SecurityCodeViewModel(
 
     fun enqueueOnExploding(cvv: String, callback: PayButton.OnEnqueueResolvedCallback) {
         CoroutineScope(Dispatchers.IO).launch {
-            val token = if (paymentRecovery != null) {
+            val response = if (paymentRecovery != null) {
                 CVVRecoveryWrapper(cardTokenRepository,
                     escManagerBehaviour,
                     paymentRecovery!!).recoverWithCVV(cvv)
@@ -84,10 +84,10 @@ class SecurityCodeViewModel(
             }
 
             withContext(Dispatchers.Main) {
-                token?.let {
+                response.resolve(success = { token ->
                     paymentSettingRepository.configure(token)
                     callback.success()
-                } ?: callback.failure()
+                }, error = { callback.failure(it) })
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.mercadopago.android.px.internal.features.pay_button
 
+import androidx.annotation.StringRes
+import com.mercadopago.android.px.R
 import com.mercadopago.android.px.addons.model.SecurityValidationData
 import com.mercadopago.android.px.internal.features.explode.ExplodeDecorator
 import com.mercadopago.android.px.internal.viewmodel.BusinessPaymentModel
@@ -23,6 +25,7 @@ internal open class UIResult : PayButtonState() {
     data class NoCongratsResult(val model : PaymentModel) : UIResult()
 }
 
-internal open class UIError(val message: String, val detail: String) : PayButtonState() {
-    class ConnectionError(error: MercadoPagoError) : UIError(error.message.orEmpty(), error.errorDetail.orEmpty())
+internal open class UIError(@StringRes val resMessage: Int, val message: String) : PayButtonState() {
+    class ConnectionError(error: MercadoPagoError) : UIError(R.string.px_no_connection_message, error.message.orEmpty())
+    class BusinessError(error: MercadoPagoError) : UIError(R.string.px_error_title, error.message.orEmpty())
 }

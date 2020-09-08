@@ -19,12 +19,12 @@ import com.mercadopago.android.px.core.BackHandler
 import com.mercadopago.android.px.internal.di.viewModel
 import com.mercadopago.android.px.internal.features.pay_button.PayButton
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment
+import com.mercadopago.android.px.internal.features.pay_button.RetriesConfiguration
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.util.nonNullObserve
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
-
 
 internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler {
 
@@ -34,6 +34,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
     private lateinit var cvvEditText: EditText
     private lateinit var cvvTitle: TextView
     private lateinit var cvvSubtitle: TextView
+    private lateinit var retriesConfiguration: RetriesConfiguration
     private lateinit var payButtonFragment: PayButtonFragment
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -44,7 +45,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as AppCompatActivity?)?.apply {
+        (activity as? AppCompatActivity?)?.apply {
             view.findViewById<Toolbar>(R.id.cvv_toolbar)?.also { toolbar ->
                 setSupportActionBar(toolbar)
                 supportActionBar?.apply {
@@ -75,7 +76,23 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
 
         } ?: error("")
 
-        payButtonFragment = childFragmentManager.findFragmentById(R.id.pay_button) as PayButtonFragment
+        retriesConfiguration = RetriesConfiguration(
+            getString(R.string.px_connectivity_neutral_error),
+            getString(R.string.px_connectivity_error),
+            getString(R.string.px_connectivity_action),
+            3
+        )
+
+        payButtonFragment = (childFragmentManager.findFragmentByTag(PayButtonFragment.TAG) as PayButtonFragment?)
+            ?: PayButtonFragment().also {
+                it.arguments = Bundle().apply {
+                    putParcelable(PayButtonFragment.RETRIES_CONFIGURATION_EXTRA, retriesConfiguration)
+                }
+                childFragmentManager
+                    .beginTransaction()
+                    .add(R.id.pay_button, it, PayButtonFragment.TAG)
+                    .commitAllowingStateLoss()
+            }
     }
 
     override fun onResume() {
@@ -120,20 +137,22 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         private const val PAYMENT_RECOVERY_EXTRA = "payment_recovery"
 
         @JvmStatic
-        fun newInstance(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery) = SecurityCodeFragment().also {
-            it.arguments = Bundle().apply {
-                putParcelable(PAYMENT_CONFIGURATION_EXTRA, paymentConfiguration)
-                putParcelable(PAYMENT_RECOVERY_EXTRA, paymentRecovery)
+        fun newInstance(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery) =
+            SecurityCodeFragment().also {
+                it.arguments = Bundle().apply {
+                    putParcelable(PAYMENT_CONFIGURATION_EXTRA, paymentConfiguration)
+                    putParcelable(PAYMENT_RECOVERY_EXTRA, paymentRecovery)
+                }
             }
-        }
 
         @JvmStatic
-        fun newInstance(paymentConfiguration: PaymentConfiguration, reason: Reason) = SecurityCodeFragment().also {
-            it.arguments = Bundle().apply {
-                putParcelable(PAYMENT_CONFIGURATION_EXTRA, paymentConfiguration)
-                putString(REASON_EXTRA, reason.name)
+        fun newInstance(paymentConfiguration: PaymentConfiguration, reason: Reason) =
+            SecurityCodeFragment().also {
+                it.arguments = Bundle().apply {
+                    putParcelable(PAYMENT_CONFIGURATION_EXTRA, paymentConfiguration)
+                    putString(REASON_EXTRA, reason.name)
+                }
             }
-        }
     }
 
     override fun handleBack(): Boolean {

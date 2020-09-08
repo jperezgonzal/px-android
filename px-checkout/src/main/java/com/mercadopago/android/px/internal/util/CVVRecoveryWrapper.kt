@@ -3,9 +3,10 @@ package com.mercadopago.android.px.internal.util
 import com.mercadopago.android.px.addons.ESCManagerBehaviour
 import com.mercadopago.android.px.internal.extensions.isNotNullNorEmpty
 import com.mercadopago.android.px.internal.repository.CardTokenRepository
+import com.mercadopago.android.px.internal.services.Response
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.Token
-import com.mercadopago.android.px.model.exceptions.CardTokenException
+import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import com.mercadopago.android.px.tracking.internal.events.CVVRecoveryFrictionTracker
 import com.mercadopago.android.px.tracking.internal.model.Reason
 
@@ -17,21 +18,20 @@ internal class CVVRecoveryWrapper(cardTokenRepository: CardTokenRepository,
     private val card = paymentRecovery.card
     private val token = paymentRecovery.token
 
-    suspend fun recoverWithCVV(cvv: String): Token? {
-        var token: Token? = null
-        try {
-            if (hasToCloneToken() && tokenCreationWrapper.validateCVVFromToken(cvv)) {
-                token = tokenCreationWrapper.cloneToken(cvv)
-            } else if (isSavedCardWithESC() || hasToRecoverTokenFromESC()) {
-                token = tokenCreationWrapper.createTokenWithEsc(cvv)
-            } else if (isSavedCardWithoutESC()) {
-                token = tokenCreationWrapper.createTokenWithoutEsc(cvv)
-            }
-        } catch (exception: CardTokenException) {
-            CVVRecoveryFrictionTracker.with(card, Reason.from(paymentRecovery))?.track()
-        } finally {
-            return token
+    suspend fun recoverWithCVV(cvv: String): Response<Token, MercadoPagoError> {
+        var response: Response<Token, MercadoPagoError> = Response.Failure(MercadoPagoError.createNotRecoverable(""))
+
+        if (hasToCloneToken() && tokenCreationWrapper.validateCVVFromToken(cvv)) {
+            response = tokenCreationWrapper.cloneToken(cvv)
+        } else if (isSavedCardWithESC() || hasToRecoverTokenFromESC()) {
+            response = tokenCreationWrapper.createTokenWithEsc(cvv)
+        } else if (isSavedCardWithoutESC()) {
+            response = tokenCreationWrapper.createTokenWithoutEsc(cvv)
         }
+
+        response.resolve(error = { CVVRecoveryFrictionTracker.with(card, Reason.from(paymentRecovery))?.track() })
+
+        return response
     }
 
     private fun hasToCloneToken() = token?.run { cardId.isNullOrEmpty() } ?: false

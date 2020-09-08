@@ -1,18 +1,14 @@
 package com.mercadopago.android.px.internal.util
 
 import com.mercadopago.android.px.addons.ESCManagerBehaviour
-import com.mercadopago.android.px.addons.model.EscDeleteReason
-import com.mercadopago.android.px.internal.callbacks.TaggedCallback
+import com.mercadopago.android.px.internal.callbacks.awaitTaggedCallback
 import com.mercadopago.android.px.internal.extensions.isNotNullNorEmpty
 import com.mercadopago.android.px.internal.repository.CardTokenRepository
+import com.mercadopago.android.px.internal.services.Response
 import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.exceptions.CardTokenException
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
-import com.mercadopago.android.px.model.exceptions.MercadoPagoErrorWrapper
 import com.mercadopago.android.px.tracking.internal.model.Reason
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 internal class TokenCreationWrapper private constructor(builder: Builder) {
 
@@ -32,7 +28,7 @@ internal class TokenCreationWrapper private constructor(builder: Builder) {
         reason = builder.reason!!
     }
 
-    suspend fun createToken(cvv: String): Token {
+    suspend fun createToken(cvv: String): Response<Token, MercadoPagoError> {
         return if (escManagerBehaviour.isESCEnabled) {
             createTokenWithEsc(cvv)
         } else {
@@ -40,11 +36,13 @@ internal class TokenCreationWrapper private constructor(builder: Builder) {
         }
     }
 
-    suspend fun createTokenWithEsc(cvv: String): Token {
+    suspend fun createTokenWithEsc(cvv: String): Response<Token, MercadoPagoError> {
         return if (card != null) {
             SavedESCCardToken.createWithSecurityCode(card.id!!, cvv).run {
                 validateSecurityCode(card)
-                createESCToken(this).apply { lastFourDigits = card.lastFourDigits }
+                createESCToken(this).apply {
+                    resolve(success = { token -> token.lastFourDigits = card.lastFourDigits })
+                }
             }
         } else {
             SavedESCCardToken.createWithSecurityCode(token!!.cardId, cvv).run {
@@ -58,9 +56,12 @@ internal class TokenCreationWrapper private constructor(builder: Builder) {
         SavedCardToken(card!!.id, cvv).run {
             validateSecurityCode(card)
             createToken(this)
-    }
+        }
 
-    suspend fun cloneToken(cvv: String) = putCVV(cvv, doCloneToken().id)
+    suspend fun cloneToken(cvv: String) = when (val response = doCloneToken()) {
+        is Response.Success -> putCVV(cvv, response.result.id)
+        is Response.Failure -> response
+    }
 
     @Throws(CardTokenException::class)
     fun validateCVVFromToken(cvv: String): Boolean {
@@ -72,68 +73,21 @@ internal class TokenCreationWrapper private constructor(builder: Builder) {
         return true
     }
 
-    private suspend fun createESCToken(savedESCCardToken: SavedESCCardToken): Token {
-        return suspendCoroutine {cont ->
-            cardTokenRepository
-                .createToken(savedESCCardToken).enqueue(object : TaggedCallback<Token>(ApiUtil.RequestOrigin.CREATE_TOKEN) {
-                    override fun onSuccess(token: Token) {
-                        if (Reason.ESC_CAP == reason) { // Remove previous esc for tracking purpose
-                            escManagerBehaviour.deleteESCWith(savedESCCardToken.cardId, EscDeleteReason.ESC_CAP, null)
-                        }
-                        cardTokenRepository.clearCap(savedESCCardToken.cardId) { cont.resume(token) }
-                    }
+    private suspend fun createESCToken(savedESCCardToken: SavedESCCardToken) = cardTokenRepository
+        .createToken(savedESCCardToken)
+        .awaitTaggedCallback(ApiUtil.RequestOrigin.CREATE_TOKEN)
 
-                    override fun onFailure(error: MercadoPagoError) {
-                        cont.resumeWithException(MercadoPagoErrorWrapper(error))
-                    }
-                })
-        }
-    }
+    private suspend fun createToken(savedCardToken: SavedCardToken) = cardTokenRepository
+        .createToken(savedCardToken)
+        .awaitTaggedCallback(ApiUtil.RequestOrigin.CREATE_TOKEN)
 
-    private suspend fun createToken(savedCardToken: SavedCardToken): Token {
-        return suspendCoroutine {cont ->
-            cardTokenRepository
-                .createToken(savedCardToken).enqueue(object : TaggedCallback<Token>(ApiUtil.RequestOrigin.CREATE_TOKEN) {
-                    override fun onSuccess(token: Token) {
-                        cont.resume(token)
-                    }
+    private suspend fun doCloneToken() = cardTokenRepository
+        .cloneToken(token!!.id)
+        .awaitTaggedCallback(ApiUtil.RequestOrigin.CREATE_TOKEN)
 
-                    override fun onFailure(error: MercadoPagoError) {
-                        cont.resumeWithException(MercadoPagoErrorWrapper(error))
-                    }
-                })
-        }
-    }
-
-    private suspend fun doCloneToken(): Token {
-        return suspendCoroutine {cont ->
-            cardTokenRepository.cloneToken(token!!.id)
-                .enqueue(object : TaggedCallback<Token>(ApiUtil.RequestOrigin.CREATE_TOKEN) {
-                    override fun onSuccess(token: Token) {
-                        cont.resume(token)
-                    }
-
-                    override fun onFailure(error: MercadoPagoError) {
-                        cont.resumeWithException(MercadoPagoErrorWrapper(error))
-                    }
-                })
-        }
-    }
-
-    private suspend fun putCVV(cvv: String, tokenId: String): Token {
-        return suspendCoroutine {cont ->
-            cardTokenRepository.putSecurityCode(cvv, tokenId).enqueue(
-                object : TaggedCallback<Token>(ApiUtil.RequestOrigin.CREATE_TOKEN) {
-                    override fun onSuccess(token: Token) {
-                        cont.resume(token)
-                    }
-
-                    override fun onFailure(error: MercadoPagoError) {
-                        cont.resumeWithException(MercadoPagoErrorWrapper(error))
-                    }
-                })
-        }
-    }
+    private suspend fun putCVV(cvv: String, tokenId: String) = cardTokenRepository
+        .putSecurityCode(cvv, tokenId)
+        .awaitTaggedCallback(ApiUtil.RequestOrigin.CREATE_TOKEN)
 
     class Builder(val cardTokenRepository: CardTokenRepository, val escManagerBehaviour: ESCManagerBehaviour) {
         var card: Card? = null
@@ -152,6 +106,7 @@ internal class TokenCreationWrapper private constructor(builder: Builder) {
             this.card = card
             this.paymentMethod = card.paymentMethod
         }
+
         fun with(token: Token) = apply { this.token = token }
         fun with(paymentMethod: PaymentMethod) = apply { this.paymentMethod = paymentMethod }
         fun with(paymentRecovery: PaymentRecovery) = apply {

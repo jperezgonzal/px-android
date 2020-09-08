@@ -7,7 +7,7 @@ import com.mercadopago.android.px.internal.repository.ExperimentsRepository
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
 import com.mercadopago.android.px.internal.services.CheckoutService
 import com.mercadopago.android.px.internal.services.Response
-import com.mercadopago.android.px.internal.services.awaitCallback
+import com.mercadopago.android.px.internal.callbacks.awaitCallback
 import com.mercadopago.android.px.internal.tracking.TrackingRepository
 import com.mercadopago.android.px.model.internal.InitResponse
 
@@ -23,7 +23,7 @@ class CheckoutRepositoryImpl(
 
     override suspend fun loadInitResponse(): InitResponse? =
         when (val callbackResult = init().awaitCallback()) {
-            is Response.Success<*> -> callbackResult.result as InitResponse
-            is Response.Failure<*> -> null
+            is Response.Success -> callbackResult.result
+            is Response.Failure -> null
         }
 }
