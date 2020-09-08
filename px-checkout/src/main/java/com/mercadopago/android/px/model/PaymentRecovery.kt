@@ -2,11 +2,13 @@ package com.mercadopago.android.px.model
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.mercadopago.android.px.internal.util.KParcelable
+import com.mercadopago.android.px.internal.util.parcelableCreator
 import java.io.Serializable
 
 //TODO move to internal package.
 class PaymentRecovery(private val statusDetail: String, val token: Token?, val card: Card?,
-                      val paymentMethod: PaymentMethod?) : Serializable, Parcelable {
+                      val paymentMethod: PaymentMethod?) : Serializable, KParcelable {
 
     @Deprecated("")
     constructor(paymentStatusDetail: String) : this(paymentStatusDetail, null, null)
@@ -46,10 +48,7 @@ class PaymentRecovery(private val statusDetail: String, val token: Token?, val c
         parcel.writeParcelable(paymentMethod, flags)
     }
 
-    override fun describeContents() = 0
-
-    companion object CREATOR : Parcelable.Creator<PaymentRecovery> {
-        override fun createFromParcel(parcel: Parcel) = PaymentRecovery(parcel)
-        override fun newArray(size: Int) = arrayOfNulls<PaymentRecovery>(size)
+    companion object {
+        @JvmField val CREATOR = parcelableCreator(::PaymentRecovery)
     }
 }

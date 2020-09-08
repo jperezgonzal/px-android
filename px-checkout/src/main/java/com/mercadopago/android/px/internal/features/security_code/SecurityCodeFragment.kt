@@ -22,6 +22,7 @@ import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment
 import com.mercadopago.android.px.internal.features.pay_button.RetriesConfiguration
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.util.nonNullObserve
+import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
@@ -67,12 +68,12 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         arguments?.apply {
 
             check(
-                containsKey(PAYMENT_RECOVERY_EXTRA) || containsKey(PAYMENT_CONFIGURATION_EXTRA) && containsKey(REASON_EXTRA))
+                containsKey(EXTRA_PAYMENT_RECOVERY) || containsKey(EXTRA_PAYMENT_CONFIGURATION) && containsKey(EXTRA_REASON))
 
             securityCodeViewModel.init(
-                getParcelable(PAYMENT_CONFIGURATION_EXTRA)!!,
-                getParcelable(PAYMENT_RECOVERY_EXTRA),
-                getString(REASON_EXTRA)?.let { Reason.valueOf(it) })
+                getParcelable(EXTRA_PAYMENT_CONFIGURATION)!!,
+                getParcelable(EXTRA_PAYMENT_RECOVERY),
+                getString(EXTRA_REASON)?.let { Reason.valueOf(it) })
 
         } ?: error("")
 
@@ -93,10 +94,10 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
                     .add(R.id.pay_button, it, PayButtonFragment.TAG)
                     .commitAllowingStateLoss()
             }
+        buildViewModel()
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun buildViewModel() {
         with(securityCodeViewModel) {
             cvvCardUiLiveData.nonNullObserve(viewLifecycleOwner) {
                 with(cardDrawer) {
@@ -123,7 +124,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
     }
 
     override fun prePayment(callback: PayButton.OnReadyForPaymentCallback) {
-        securityCodeViewModel.handlePrePaymentFinished(callback)
+        securityCodeViewModel.handlePrepayment(callback)
     }
 
     override fun enqueueOnExploding(callback: PayButton.OnEnqueueResolvedCallback) {
@@ -132,16 +133,16 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
 
     companion object {
         const val TAG = "security_code"
-        private const val PAYMENT_CONFIGURATION_EXTRA = "payment_configuration"
-        private const val REASON_EXTRA = "reason"
-        private const val PAYMENT_RECOVERY_EXTRA = "payment_recovery"
+        private const val EXTRA_PAYMENT_CONFIGURATION = "payment_configuration"
+        private const val EXTRA_REASON = "reason"
+        private const val EXTRA_PAYMENT_RECOVERY = "payment_recovery"
 
         @JvmStatic
         fun newInstance(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery) =
             SecurityCodeFragment().also {
                 it.arguments = Bundle().apply {
-                    putParcelable(PAYMENT_CONFIGURATION_EXTRA, paymentConfiguration)
-                    putParcelable(PAYMENT_RECOVERY_EXTRA, paymentRecovery)
+                    putParcelable(EXTRA_PAYMENT_CONFIGURATION, paymentConfiguration)
+                    putParcelable(EXTRA_PAYMENT_RECOVERY, paymentRecovery)
                 }
             }
 
@@ -149,8 +150,8 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         fun newInstance(paymentConfiguration: PaymentConfiguration, reason: Reason) =
             SecurityCodeFragment().also {
                 it.arguments = Bundle().apply {
-                    putParcelable(PAYMENT_CONFIGURATION_EXTRA, paymentConfiguration)
-                    putString(REASON_EXTRA, reason.name)
+                    putParcelable(EXTRA_PAYMENT_CONFIGURATION, paymentConfiguration)
+                    putString(EXTRA_REASON, reason.name)
                 }
             }
     }
