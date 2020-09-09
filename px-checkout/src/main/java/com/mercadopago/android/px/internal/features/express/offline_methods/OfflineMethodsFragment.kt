@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mercadopago.android.px.R
 import com.mercadopago.android.px.core.BackHandler
+import com.mercadopago.android.px.internal.callbacks.Event
 import com.mercadopago.android.px.internal.di.Session
 import com.mercadopago.android.px.internal.extensions.addOnLaidOutListener
 import com.mercadopago.android.px.internal.extensions.invisible
@@ -77,7 +78,7 @@ class OfflineMethodsFragment : Fragment(), OfflineMethods.View, BackHandler {
         configureBottomSheet()
 
         viewModel.onViewLoaded().nonNullObserveOnce(viewLifecycleOwner) { model -> draw(model) }
-        viewModel.getObservableDeepLink().nonNullObserve(viewLifecycleOwner) { event ->
+        viewModel.deepLinkLiveData.nonNullObserve(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.run { startKnowYourCustomerFlow(this) }
         }
     }

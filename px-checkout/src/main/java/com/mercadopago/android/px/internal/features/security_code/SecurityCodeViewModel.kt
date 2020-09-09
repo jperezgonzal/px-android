@@ -1,5 +1,6 @@
 package com.mercadopago.android.px.internal.features.security_code
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.mercadopago.android.px.addons.ESCManagerBehaviour
 import com.mercadopago.android.px.internal.base.BaseViewModel
@@ -31,9 +32,15 @@ class SecurityCodeViewModel(
     cardConfigurationMapper: CardConfigurationMapper,
     virtualCardInfoMapper: VirtualCardInfoMapper) : BaseViewModel() {
 
-    val cvvCardUiLiveData = MutableLiveData<CardDrawerConfiguration>()
-    val virtualCardInfoLiveData = MutableLiveData<VirtualCardInfo>()
-    val inputInfoLiveData = MutableLiveData<Int>()
+    private val cvvCardUiMutableLiveData = MutableLiveData<CardDrawerConfiguration>()
+    val cvvCardUiLiveData:LiveData<CardDrawerConfiguration>
+    get() = cvvCardUiMutableLiveData
+    private val virtualCardInfoMutableLiveData = MutableLiveData<VirtualCardInfo>()
+    val virtualCardInfoLiveData: LiveData<VirtualCardInfo>
+    get() = virtualCardInfoMutableLiveData
+    private val inputInfoMutableLiveData = MutableLiveData<Int>()
+    val inputInfoLiveData: LiveData<Int>
+    get() = inputInfoMutableLiveData
 
     private lateinit var paymentConfiguration: PaymentConfiguration
     private var paymentRecovery: PaymentRecovery? = null
@@ -43,7 +50,7 @@ class SecurityCodeViewModel(
 
     init {
         cvvInfo?.let {
-            virtualCardInfoLiveData.value = virtualCardInfoMapper.map(it)
+            virtualCardInfoMutableLiveData.value = virtualCardInfoMapper.map(it)
         } ?: CoroutineScope(Dispatchers.IO).launch {
             val initResponse = initRepository.loadInitResponse()
             val cardDisplayInfo = initResponse?.let { response ->
@@ -52,10 +59,10 @@ class SecurityCodeViewModel(
                 expressMetadata.card?.displayInfo
             } ?: error("")
 
-            cvvCardUiLiveData.postValue(cardConfigurationMapper.map(cardDisplayInfo))
+            cvvCardUiMutableLiveData.postValue(cardConfigurationMapper.map(cardDisplayInfo))
         }
 
-        inputInfoLiveData.value = cardUserSelection.getSecurityCodeLength()
+        inputInfoMutableLiveData.value = cardUserSelection.getSecurityCodeLength()
     }
 
     fun init(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery?, reason: Reason?) {

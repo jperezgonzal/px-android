@@ -21,7 +21,6 @@ import com.mercadopago.android.px.internal.features.pay_button.PayButton
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.util.nonNullObserve
-import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
@@ -77,10 +76,10 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         } ?: error("")
 
         payButtonFragment = childFragmentManager.findFragmentById(R.id.pay_button) as PayButtonFragment
-        buildViewModel()
+        observeViewModel()
     }
 
-    private fun buildViewModel() {
+    private fun observeViewModel() {
         with(securityCodeViewModel) {
             cvvCardUiLiveData.nonNullObserve(viewLifecycleOwner) {
                 with(cardDrawer) {
@@ -112,10 +111,6 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
 
     override fun enqueueOnExploding(callback: PayButton.OnEnqueueResolvedCallback) {
         securityCodeViewModel.enqueueOnExploding(cvvEditText.text.toString(), callback)
-    }
-
-    override fun onPaymentFinished(paymentModel: PaymentModel, callback: PayButton.OnPaymentFinishedCallback) {
-        super.onPaymentFinished(paymentModel, callback)
     }
 
     companion object {

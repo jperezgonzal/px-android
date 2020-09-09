@@ -8,7 +8,7 @@ import java.io.Serializable
 
 //TODO move to internal package.
 class PaymentRecovery(private val statusDetail: String, val token: Token?, val card: Card?,
-                      val paymentMethod: PaymentMethod?) : Serializable, KParcelable {
+    val paymentMethod: PaymentMethod?) : Serializable, KParcelable {
 
     @Deprecated("")
     constructor(paymentStatusDetail: String) : this(paymentStatusDetail, null, null)
@@ -19,23 +19,19 @@ class PaymentRecovery(private val statusDetail: String, val token: Token?, val c
     @Deprecated("")
     constructor(statusDetail: String, token: Token?, card: Card?) : this(statusDetail, token, card, null)
 
-    val isTokenRecoverable: Boolean
-        get() = Payment.StatusDetail.isStatusDetailRecoverable(statusDetail)
+    val isTokenRecoverable = Payment.StatusDetail.isStatusDetailRecoverable(statusDetail)
 
-    val isStatusDetailCallForAuthorize: Boolean
-        get() = Payment.StatusDetail.STATUS_DETAIL_CC_REJECTED_CALL_FOR_AUTHORIZE == statusDetail
+    val isStatusDetailCallForAuthorize = Payment.StatusDetail.STATUS_DETAIL_CC_REJECTED_CALL_FOR_AUTHORIZE == statusDetail
 
-    val isStatusDetailCardDisabled: Boolean
-        get() = Payment.StatusDetail.STATUS_DETAIL_CC_REJECTED_CARD_DISABLED == statusDetail
+    val isStatusDetailCardDisabled = Payment.StatusDetail.STATUS_DETAIL_CC_REJECTED_CARD_DISABLED == statusDetail
 
-    val isStatusDetailInvalidESC: Boolean
-        get() = Payment.StatusDetail.STATUS_DETAIL_INVALID_ESC == statusDetail
+    val isStatusDetailInvalidESC = Payment.StatusDetail.STATUS_DETAIL_INVALID_ESC == statusDetail
 
     constructor(parcel: Parcel) : this(
-            parcel.readString()!!,
-            parcel.readSerializable() as Token,
-            parcel.readParcelable(Card::class.java.classLoader),
-            parcel.readParcelable(PaymentMethod::class.java.classLoader))
+        parcel.readString()!!,
+        parcel.readSerializable() as Token,
+        parcel.readParcelable(Card::class.java.classLoader),
+        parcel.readParcelable(PaymentMethod::class.java.classLoader))
 
     fun shouldAskForCvv(): Boolean {
         return Payment.StatusDetail.STATUS_DETAIL_CC_REJECTED_CARD_DISABLED != statusDetail
@@ -49,6 +45,7 @@ class PaymentRecovery(private val statusDetail: String, val token: Token?, val c
     }
 
     companion object {
-        @JvmField val CREATOR = parcelableCreator(::PaymentRecovery)
+        @JvmField
+        val CREATOR = parcelableCreator(::PaymentRecovery)
     }
 }

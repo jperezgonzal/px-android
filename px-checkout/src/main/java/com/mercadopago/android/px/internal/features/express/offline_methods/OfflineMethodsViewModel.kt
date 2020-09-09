@@ -33,6 +33,8 @@ internal class OfflineMethodsViewModel(private val initRepository: InitRepositor
     private var selectedItem: OfflineMethodItem? = null
 
     private val observableDeepLink = MutableLiveData<Event<String>>()
+    val deepLinkLiveData: LiveData<Event<String>>
+    get() = observableDeepLink
 
     override fun onViewLoaded(): LiveData<OfflineMethods.Model> {
         val liveData = MutableLiveData<OfflineMethods.Model>()
@@ -98,6 +100,4 @@ internal class OfflineMethodsViewModel(private val initRepository: InitRepositor
     override fun onBack() {
         BackEvent(viewTracker).track()
     }
-
-    override fun getObservableDeepLink(): LiveData<Event<String>> = observableDeepLink
 }
