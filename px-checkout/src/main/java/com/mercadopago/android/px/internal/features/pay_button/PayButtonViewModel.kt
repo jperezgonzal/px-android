@@ -129,7 +129,9 @@ internal class PayButtonViewModel(
             }
 
             override fun failure(error: MercadoPagoError) {
-                stateUILiveData.value = UIError.BusinessError(error)
+                handler?.takeIf { it.resolvePaymentError(error) }
+                    ?.let { stateUILiveData.value = ButtonLoadingCanceled }
+                    ?: let { stateUILiveData.value = UIError.BusinessError(error) }
             }
         })
     }
@@ -140,8 +142,7 @@ internal class PayButtonViewModel(
         val paymentErrorLiveData: LiveData<ButtonLoadingCanceled?> =
             transform(serviceLiveData.paymentErrorLiveData) { error ->
                 val shouldHandleError = error.isPaymentProcessing
-                if (shouldHandleError) onPaymentProcessingError() else noRecoverableError(error)
-                handler?.onPaymentError(error)
+                if (shouldHandleError) onPaymentProcessingError(error) else noRecoverableError(error)
                 ButtonLoadingCanceled
             }
         stateUILiveData.addSource(paymentErrorLiveData) { value -> stateUILiveData.value = value }
@@ -170,20 +171,21 @@ internal class PayButtonViewModel(
         val recoverRequiredLiveData: LiveData<PaymentRecovery?> =
             transform(serviceLiveData.recoverInvalidEscLiveData) { it.takeIf { it.shouldAskForCvv() } }
         this.recoverRequiredLiveData.addSource(recoverRequiredLiveData) { value ->
-            value?.let {
-                paymentRecovery -> this.recoverRequiredLiveData.value = Pair(paymentConfiguration!!, paymentRecovery)
+            value?.let { paymentRecovery ->
+                this.recoverRequiredLiveData.value = Pair(paymentConfiguration!!, paymentRecovery)
             }
             stateUILiveData.value = ButtonLoadingCanceled
         }
     }
 
-    private fun onPaymentProcessingError() {
+    private fun onPaymentProcessingError(error: MercadoPagoError) {
         val currency: Currency = paymentSettingRepository.currency
         val paymentResult: PaymentResult = PaymentResult.Builder()
             .setPaymentData(paymentService.paymentDataList)
             .setPaymentStatus(Payment.StatusCodes.STATUS_IN_PROCESS)
             .setPaymentStatusDetail(Payment.StatusDetail.STATUS_DETAIL_PENDING_CONTINGENCY)
             .build()
+        handler?.resolvePaymentError(error)
         onPostPayment(PaymentModel(paymentResult, currency))
     }
 
@@ -220,7 +222,8 @@ internal class PayButtonViewModel(
 
     private fun manageNoConnection() {
         trackNoRecoverableFriction(connectivityError)
-        stateUILiveData.value = connectionError
+        handler?.takeIf { it.resolvePaymentError(connectivityError) }
+            ?: let { stateUILiveData.value = connectionError }
     }
 
     private fun trackNoRecoverableFriction(error: MercadoPagoError) {
@@ -230,7 +233,8 @@ internal class PayButtonViewModel(
 
     private fun noRecoverableError(error: MercadoPagoError) {
         trackNoRecoverableFriction(error)
-        stateUILiveData.value = UIError.BusinessError(error)
+        handler?.takeIf { it.resolvePaymentError(error) }
+            ?: let { stateUILiveData.value = UIError.BusinessError(error) }
     }
 
     override fun hasFinishPaymentAnimation() {

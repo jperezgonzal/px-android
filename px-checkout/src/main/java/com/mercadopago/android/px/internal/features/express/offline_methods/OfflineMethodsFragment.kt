@@ -21,10 +21,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mercadopago.android.px.R
 import com.mercadopago.android.px.core.BackHandler
 import com.mercadopago.android.px.internal.di.Session
-import com.mercadopago.android.px.internal.extensions.addOnLaidOutListener
-import com.mercadopago.android.px.internal.extensions.invisible
-import com.mercadopago.android.px.internal.extensions.setHeight
-import com.mercadopago.android.px.internal.extensions.visible
+import com.mercadopago.android.px.internal.extensions.*
 import com.mercadopago.android.px.internal.features.pay_button.PayButton.OnReadyForPaymentCallback
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment
 import com.mercadopago.android.px.internal.font.PxFont

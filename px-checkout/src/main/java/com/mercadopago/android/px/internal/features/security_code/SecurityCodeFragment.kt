@@ -14,16 +14,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.meli.android.carddrawer.model.CardDrawerView
+import com.mercadolibre.android.andesui.snackbar.action.AndesSnackbarAction
+import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration
+import com.mercadolibre.android.andesui.snackbar.type.AndesSnackbarType
 import com.mercadopago.android.px.R
 import com.mercadopago.android.px.core.BackHandler
 import com.mercadopago.android.px.internal.di.viewModel
+import com.mercadopago.android.px.internal.extensions.showSnackBar
 import com.mercadopago.android.px.internal.features.pay_button.PayButton
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment
-import com.mercadopago.android.px.internal.features.pay_button.RetriesConfiguration
+import com.mercadopago.android.px.internal.features.pay_button.SnackBarRetriesConfiguration
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.util.nonNullObserve
-import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.model.PaymentRecovery
+import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
 
@@ -35,8 +39,9 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
     private lateinit var cvvEditText: EditText
     private lateinit var cvvTitle: TextView
     private lateinit var cvvSubtitle: TextView
-    private lateinit var retriesConfiguration: RetriesConfiguration
+    private lateinit var snackBarRetriesConfiguration: SnackBarRetriesConfiguration
     private lateinit var payButtonFragment: PayButtonFragment
+    private var retries = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
@@ -77,17 +82,19 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
 
         } ?: error("")
 
-        retriesConfiguration = RetriesConfiguration(
+        snackBarRetriesConfiguration = SnackBarRetriesConfiguration(
             getString(R.string.px_connectivity_neutral_error),
             getString(R.string.px_connectivity_error),
-            getString(R.string.px_connectivity_action),
+            getString(R.string.px_snackbar_error_action),
             3
         )
+
+        savedInstanceState?.apply { retries = getInt(RETRIES_COUNT_EXTRA, 0) }
 
         payButtonFragment = (childFragmentManager.findFragmentByTag(PayButtonFragment.TAG) as PayButtonFragment?)
             ?: PayButtonFragment().also {
                 it.arguments = Bundle().apply {
-                    putParcelable(PayButtonFragment.RETRIES_CONFIGURATION_EXTRA, retriesConfiguration)
+                    putParcelable(PayButtonFragment.RETRIES_CONFIGURATION_EXTRA, snackBarRetriesConfiguration)
                 }
                 childFragmentManager
                     .beginTransaction()
@@ -95,6 +102,11 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
                     .commitAllowingStateLoss()
             }
         buildViewModel()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(RETRIES_COUNT_EXTRA, retries)
     }
 
     private fun buildViewModel() {
@@ -131,11 +143,41 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         securityCodeViewModel.enqueueOnExploding(cvvEditText.text.toString(), callback)
     }
 
+    override fun resolvePaymentError(error: MercadoPagoError): Boolean {
+        when {
+            error.isNoConnectivityError -> resolveConnectionError()
+            !error.isPaymentProcessing -> {
+                val action = AndesSnackbarAction(
+                    getString(R.string.px_snackbar_error_action),
+                    View.OnClickListener { activity?.onBackPressed() }
+                )
+                view.showSnackBar(getString(R.string.px_error_title), andesSnackbarAction = action)
+            }
+        }
+        return true
+    }
+
+    private fun resolveConnectionError() {
+        snackBarRetriesConfiguration.let { config ->
+            if (retries < config.maxRetries) {
+                retries += 1
+                view.showSnackBar(config.retriesMessage, AndesSnackbarType.NEUTRAL, AndesSnackbarDuration.SHORT)
+            } else {
+                val action = AndesSnackbarAction(
+                    config.actionErrorMessage,
+                    View.OnClickListener { activity?.onBackPressed() }
+                )
+                view.showSnackBar(config.errorRetriesMessage, andesSnackbarAction = action)
+            }
+        }
+    }
+
     companion object {
         const val TAG = "security_code"
         private const val EXTRA_PAYMENT_CONFIGURATION = "payment_configuration"
         private const val EXTRA_REASON = "reason"
         private const val EXTRA_PAYMENT_RECOVERY = "payment_recovery"
+        private const val RETRIES_COUNT_EXTRA = "retries_count"
 
         @JvmStatic
         fun newInstance(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery) =

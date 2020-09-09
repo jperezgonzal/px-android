@@ -11,17 +11,13 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import com.mercadolibre.android.andesui.snackbar.AndesSnackbar
-import com.mercadolibre.android.andesui.snackbar.action.AndesSnackbarAction
-import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration
-import com.mercadolibre.android.andesui.snackbar.type.AndesSnackbarType
 import com.mercadolibre.android.ui.widgets.MeliButton
 import com.mercadopago.android.px.R
 import com.mercadopago.android.px.addons.BehaviourProvider
 import com.mercadopago.android.px.addons.internal.SecurityValidationHandler
 import com.mercadopago.android.px.addons.model.SecurityValidationData
-import com.mercadopago.android.px.internal.extensions.orIfEmpty
 import com.mercadopago.android.px.internal.di.viewModel
+import com.mercadopago.android.px.internal.extensions.showSnackBar
 import com.mercadopago.android.px.internal.features.Constants
 import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultActivity
 import com.mercadopago.android.px.internal.features.dummy_result.DummyResultActivity
@@ -41,8 +37,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     private var buttonStatus = MeliButton.State.NORMAL
     private lateinit var button: MeliButton
-    private var retriesConfiguration: RetriesConfiguration? = null
-    private var retries = 0
     private val viewModel: PayButtonViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -51,9 +45,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        arguments?.apply {
-            retriesConfiguration = getParcelable(RETRIES_CONFIGURATION_EXTRA)
-        }
         when {
             targetFragment is PayButton.Handler -> viewModel.attach(targetFragment as PayButton.Handler)
             parentFragment is PayButton.Handler -> viewModel.attach(parentFragment as PayButton.Handler)
@@ -70,7 +61,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         savedInstanceState?.let {
             buttonStatus = it.getInt(EXTRA_STATE, MeliButton.State.NORMAL)
             button.visibility = it.getInt(EXTRA_VISIBILITY, VISIBLE)
-            retries = it.getInt(RETRIES_COUNT_EXTRA, 0)
             viewModel.recoverFromBundle(it)
         }
         updateButtonState()
@@ -90,7 +80,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         super.onSaveInstanceState(outState)
         outState.putInt(EXTRA_STATE, buttonStatus)
         outState.putInt(EXTRA_VISIBILITY, button.visibility)
-        outState.putInt(RETRIES_COUNT_EXTRA, retries)
         viewModel.storeInBundle(outState)
     }
 
@@ -129,50 +118,14 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         }
     }
 
-    private fun resolveConnectionError(uiError: UIError) {
-        retriesConfiguration?.let { config ->
-            if (retries < config.maxRetries) {
-                retries += 1
-                showSnackBar(config.retriesMessage, AndesSnackbarType.NEUTRAL, AndesSnackbarDuration.SHORT)
-            } else {
-                val action = AndesSnackbarAction(
-                    config.actionErrorMessage,
-                    View.OnClickListener { activity?.onBackPressed() }
-                )
-                showSnackBar(config.errorMessage, andesSnackbarAction = action)
-            }
-        } ?: showSnackBar(getString(uiError.resMessage))
-    }
-
-    private fun showSnackBar(
-        message: String,
-        andesSnackbarType: AndesSnackbarType = AndesSnackbarType.ERROR,
-        andesSnackbarDuration: AndesSnackbarDuration = AndesSnackbarDuration.LONG,
-        andesSnackbarAction: AndesSnackbarAction? = null) {
-        view?.let { view ->
-            view.context?.let { context ->
-                AndesSnackbar(context,
-                    view,
-                    andesSnackbarType,
-                    message.orIfEmpty(context.getString(R.string.px_error_title)),
-                    andesSnackbarDuration).also { it.action = andesSnackbarAction }.show()
-            }
-        }
+    private fun startBiometricsValidation(validationData: SecurityValidationData) {
+        disable()
+        BehaviourProvider.getSecurityBehaviour().startValidation(this, validationData, REQ_CODE_BIOMETRICS)
     }
 
     private fun resolveError(uiError: UIError) {
         cancelLoading()
-        when (uiError) {
-            is UIError.ConnectionError -> {
-                resolveConnectionError(uiError)
-            }
-            else -> showSnackBar(getString(uiError.resMessage))
-        }
-    }
-
-    private fun startBiometricsValidation(validationData: SecurityValidationData) {
-        disable()
-        BehaviourProvider.getSecurityBehaviour().startValidation(this, validationData, REQ_CODE_BIOMETRICS)
+        view.showSnackBar(getString(uiError.resMessage))
     }
 
     override fun onAnimationFinished() {
@@ -256,14 +209,18 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     }
 
     private fun hideConfirmButton() {
-        button.clearAnimation()
-        button.visibility = INVISIBLE
+        with(button) {
+            clearAnimation()
+            visibility = INVISIBLE
+        }
     }
 
     private fun showConfirmButton() {
-        button.clearAnimation()
         enable()
-        button.visibility = VISIBLE
+        with(button) {
+            clearAnimation()
+            visibility = VISIBLE
+        }
     }
 
     private fun showSecurityCodeScreen(securityCodeFragment: SecurityCodeFragment) {
@@ -286,7 +243,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         const val TAG = "TAG_BUTTON_FRAGMENT"
         const val REQ_CODE_CONGRATS = 300
         const val RETRIES_CONFIGURATION_EXTRA = "retries_configuration"
-        private const val RETRIES_COUNT_EXTRA = "retries_count"
         private const val REQ_CODE_PAYMENT_PROCESSOR = 302
         private const val REQ_CODE_BIOMETRICS = 303
         private const val EXTRA_STATE = "extra_state"
