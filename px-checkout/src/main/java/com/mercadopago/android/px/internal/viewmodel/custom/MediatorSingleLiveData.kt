@@ -7,27 +7,24 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
+internal class MediatorSingleLiveData<T> : MediatorLiveData<T>(), SingleLiveData<T> {
 
-    private val pending: AtomicBoolean = AtomicBoolean(false)
+    override val tag = "MediatorSingleLiveData"
+    override val pendingAtomicBoolean = AtomicBoolean(false)
 
     @MainThread
     override fun observe(owner: LifecycleOwner, observer: Observer<in T?>) {
 
         if (hasActiveObservers()) {
-            Log.w(TAG, "Multiple observers registered but only one will be notified of changes.");
+            Log.w(tag, "Multiple observers registered but only one will be notified of changes.");
         }
 
-        super.observe(owner, Observer { value ->
-            if (pending.compareAndSet(true, false)) {
-                observer.onChanged(value);
-            }
-        })
+        super.observe(owner, Observer { value -> onChange(value, observer) })
     }
 
     @MainThread
     override fun setValue(value: T?) {
-        pending.set(true)
+        setPending()
         super.setValue(value)
     }
 
@@ -37,9 +34,5 @@ internal class MediatorSingleLiveEvent<T> : MediatorLiveData<T>() {
     @MainThread
     fun call() {
         value = null
-    }
-
-    companion object {
-        private const val TAG = "MediatorSingleLiveEvent"
     }
 }

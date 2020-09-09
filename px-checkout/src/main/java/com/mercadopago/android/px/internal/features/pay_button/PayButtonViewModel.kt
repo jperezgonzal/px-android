@@ -25,7 +25,7 @@ import com.mercadopago.android.px.internal.util.SecurityValidationDataFactory
 import com.mercadopago.android.px.internal.viewmodel.BusinessPaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PostPaymentAction
-import com.mercadopago.android.px.internal.viewmodel.custom.MediatorSingleLiveEvent
+import com.mercadopago.android.px.internal.viewmodel.custom.MediatorSingleLiveData
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
@@ -59,9 +59,9 @@ internal class PayButtonViewModel(
     private var paymentConfiguration: PaymentConfiguration? = null
     private var paymentModel: PaymentModel? = null
 
-    val cvvRequiredLiveData = MediatorSingleLiveEvent<Pair<PaymentConfiguration, Reason>?>()
-    val recoverRequiredLiveData = MediatorSingleLiveEvent<Pair<PaymentConfiguration, PaymentRecovery>>()
-    val stateUILiveData = MediatorSingleLiveEvent<PayButtonState>()
+    val cvvRequiredLiveData = MediatorSingleLiveData<Pair<PaymentConfiguration, Reason>?>()
+    val recoverRequiredLiveData = MediatorSingleLiveData<Pair<PaymentConfiguration, PaymentRecovery>>()
+    val stateUILiveData = MediatorSingleLiveData<PayButtonState>()
     private var observingService = false
 
     private fun <T : Event<X>, X : Any, I> transform(liveData: LiveData<T>, block: (content: X) -> I): LiveData<I?> {
