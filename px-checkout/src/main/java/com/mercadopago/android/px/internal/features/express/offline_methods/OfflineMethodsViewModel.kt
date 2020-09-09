@@ -31,10 +31,9 @@ internal class OfflineMethodsViewModel(private val initRepository: InitRepositor
     private lateinit var viewTracker: OfflineMethodsViewTracker
     private var payerCompliance: OfflineMethodsCompliance? = null
     private var selectedItem: OfflineMethodItem? = null
-
     private val observableDeepLink = MutableLiveData<Event<String>>()
-    val deepLinkLiveData: LiveData<Event<String>>
-    get() = observableDeepLink
+    override val deepLinkLiveData: LiveData<Event<String>>
+        get() = observableDeepLink
 
     override fun onViewLoaded(): LiveData<OfflineMethods.Model> {
         val liveData = MutableLiveData<OfflineMethods.Model>()
