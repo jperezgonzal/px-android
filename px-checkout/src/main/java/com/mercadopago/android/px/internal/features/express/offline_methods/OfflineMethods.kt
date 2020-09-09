@@ -1,6 +1,7 @@
 package com.mercadopago.android.px.internal.features.express.offline_methods
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.mercadopago.android.px.internal.callbacks.Event
 import com.mercadopago.android.px.internal.features.pay_button.PayButton
 import com.mercadopago.android.px.internal.viewmodel.AmountLocalized
@@ -16,6 +17,7 @@ internal interface OfflineMethods {
     }
 
     interface ViewModel {
+        val deepLinkLiveData: LiveData<Event<String>>
         fun onSheetShowed()
         fun onViewLoaded(): LiveData<Model>
         fun onMethodSelected(selectedItem: OfflineMethodItem)
