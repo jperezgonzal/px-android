@@ -21,7 +21,6 @@ internal interface OfflineMethods {
         fun onMethodSelected(selectedItem: OfflineMethodItem)
         fun onPrePayment(callback: PayButton.OnReadyForPaymentCallback)
         fun onBack()
-        fun getObservableDeepLink(): LiveData<Event<String>>
     }
 
     interface OnMethodSelectedListener {

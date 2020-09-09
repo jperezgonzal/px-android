@@ -101,7 +101,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
                     .add(R.id.pay_button, it, PayButtonFragment.TAG)
                     .commitAllowingStateLoss()
             }
-        buildViewModel()
+        observeViewModel()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -109,7 +109,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         outState.putInt(RETRIES_COUNT_EXTRA, retries)
     }
 
-    private fun buildViewModel() {
+    private fun observeViewModel() {
         with(securityCodeViewModel) {
             cvvCardUiLiveData.nonNullObserve(viewLifecycleOwner) {
                 with(cardDrawer) {
