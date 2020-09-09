@@ -26,8 +26,7 @@
         app:backgroundTint="@color/px_payment_result_method_ring"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/radio_button"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/px_bapropagos_dynamic" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <RadioButton
         android:id="@+id/radio_button"

@@ -16,7 +16,6 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        tools:src="@drawable/px_master_dynamic"/>
+        android:adjustViewBounds="true" />
 
 </FrameLayout>
