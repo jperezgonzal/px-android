@@ -76,9 +76,9 @@ class OfflineMethodsFragment : Fragment(), OfflineMethods.View, BackHandler {
 
         configureBottomSheet()
 
-        viewModel.onViewLoaded().nonNullObserveOnce(viewLifecycleOwner) { model -> draw(model) }
-        viewModel.getObservableDeepLink().nonNullObserve(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.run { startKnowYourCustomerFlow(this) }
+        with(viewModel) {
+            onViewLoaded().nonNullObserveOnce(viewLifecycleOwner) { model -> draw(model) }
+            deepLinkLiveData.nonNullObserve(viewLifecycleOwner) { startKnowYourCustomerFlow(it) }
         }
     }
 

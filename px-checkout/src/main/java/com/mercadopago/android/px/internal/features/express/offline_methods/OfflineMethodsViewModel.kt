@@ -3,7 +3,6 @@ package com.mercadopago.android.px.internal.features.express.offline_methods
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.mercadopago.android.px.internal.base.BaseViewModel
-import com.mercadopago.android.px.internal.callbacks.Event
 import com.mercadopago.android.px.internal.extensions.orIfEmpty
 import com.mercadopago.android.px.internal.features.pay_button.PayButton.OnReadyForPaymentCallback
 import com.mercadopago.android.px.internal.repository.AmountRepository
@@ -12,6 +11,7 @@ import com.mercadopago.android.px.internal.repository.InitRepository
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
 import com.mercadopago.android.px.internal.util.TextUtil
 import com.mercadopago.android.px.internal.viewmodel.AmountLocalized
+import com.mercadopago.android.px.internal.viewmodel.custom.MutableSingleLiveData
 import com.mercadopago.android.px.model.OfflineMethodsCompliance
 import com.mercadopago.android.px.model.SensitiveInformation
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
@@ -31,8 +31,9 @@ internal class OfflineMethodsViewModel(private val initRepository: InitRepositor
     private lateinit var viewTracker: OfflineMethodsViewTracker
     private var payerCompliance: OfflineMethodsCompliance? = null
     private var selectedItem: OfflineMethodItem? = null
-
-    private val observableDeepLink = MutableLiveData<Event<String>>()
+    private val observableDeepLink = MutableSingleLiveData<String>()
+    override val deepLinkLiveData: LiveData<String>
+        get() = observableDeepLink
 
     override fun onViewLoaded(): LiveData<OfflineMethods.Model> {
         val liveData = MutableLiveData<OfflineMethods.Model>()
@@ -68,7 +69,7 @@ internal class OfflineMethodsViewModel(private val initRepository: InitRepositor
                     completePayerInformation(it.sensitiveInformation)
                 } else if (item.isAdditionalInfoNeeded) {
                     KnowYourCustomerFlowEvent(viewTracker).track()
-                    observableDeepLink.value = Event(it.turnComplianceDeepLink)
+                    observableDeepLink.value = it.turnComplianceDeepLink
                     return
                 }
             }
@@ -98,6 +99,4 @@ internal class OfflineMethodsViewModel(private val initRepository: InitRepositor
     override fun onBack() {
         BackEvent(viewTracker).track()
     }
-
-    override fun getObservableDeepLink(): LiveData<Event<String>> = observableDeepLink
 }

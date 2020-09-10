@@ -20,31 +20,28 @@ import com.mercadopago.android.px.R
 import com.mercadopago.android.px.addons.BehaviourProvider
 import com.mercadopago.android.px.addons.internal.SecurityValidationHandler
 import com.mercadopago.android.px.addons.model.SecurityValidationData
-import com.mercadopago.android.px.internal.di.Session
 import com.mercadopago.android.px.internal.extensions.orIfEmpty
+import com.mercadopago.android.px.internal.di.viewModel
 import com.mercadopago.android.px.internal.features.Constants
-import com.mercadopago.android.px.internal.features.SecurityCodeActivity
 import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultActivity
 import com.mercadopago.android.px.internal.features.dummy_result.DummyResultActivity
 import com.mercadopago.android.px.internal.features.explode.ExplodeDecorator
 import com.mercadopago.android.px.internal.features.explode.ExplodingFragment
 import com.mercadopago.android.px.internal.features.payment_result.PaymentResultActivity
 import com.mercadopago.android.px.internal.features.plugins.PaymentProcessorActivity
+import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment
 import com.mercadopago.android.px.internal.util.FragmentUtil
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.view.OnSingleClickListener
 import com.mercadopago.android.px.internal.viewmodel.PostPaymentAction
-import com.mercadopago.android.px.model.Card
-import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.tracking.internal.events.FrictionEventTracker
-import com.mercadopago.android.px.tracking.internal.model.Reason
 import com.mercadopago.android.px.internal.viewmodel.PayButtonViewModel as ButtonConfig
 
 class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler {
 
     private var buttonStatus = MeliButton.State.NORMAL
     private lateinit var button: MeliButton
-    private lateinit var viewModel: PayButtonViewModel
+    private val viewModel: PayButtonViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_pay_button, container, false)
@@ -52,7 +49,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = Session.getInstance().viewModelModule.get(this, PayButtonViewModel::class.java)
 
         when {
             targetFragment is PayButton.Handler -> viewModel.attach(targetFragment as PayButton.Handler)
@@ -78,9 +74,9 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             buttonTextLiveData.observe(viewLifecycleOwner,
                 Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
             cvvRequiredLiveData.observe(viewLifecycleOwner,
-                Observer { pair -> pair?.let { showSecurityCodeScreen(it.first, it.second) } })
+                Observer { pair -> pair?.let { showSecurityCodeScreen(SecurityCodeFragment.newInstance(it.first, it.second)) } })
             recoverRequiredLiveData.observe(viewLifecycleOwner,
-                Observer { recovery -> recovery?.let { showSecurityCodeForRecovery(it) } })
+                Observer { pair -> pair?.let { showSecurityCodeScreen(SecurityCodeFragment.newInstance(it.first, it.second)) } })
             stateUILiveData.observe(viewLifecycleOwner, Observer { state -> state?.let { onStateUIChanged(it) } })
         }
     }
@@ -155,11 +151,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
                 BehaviourProvider.getSecurityBehaviour().extraResultKey, false) ?: false
             enable()
             onSecurityValidated(resultCode == Activity.RESULT_OK, securityRequested)
-        } else if (requestCode == REQ_CODE_SECURITY_CODE) {
-            cancelLoading()
-            if (resultCode == Activity.RESULT_OK) {
-                viewModel.startPayment()
-            }
         } else if (requestCode == REQ_CODE_CONGRATS && resultCode == Constants.RESULT_ACTION) {
             handleAction(data)
         } else if (resultCode == Constants.RESULT_PAYMENT) {
@@ -186,6 +177,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     }
 
     private fun finishLoading(params: ExplodeDecorator) {
+        ViewUtils.hideKeyboard(activity)
         childFragmentManager.findFragmentByTag(ExplodingFragment.TAG)
             ?.let { (it as ExplodingFragment).finishLoading(params) }
             ?: viewModel.hasFinishPaymentAnimation()
@@ -237,13 +229,13 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         button.visibility = VISIBLE
     }
 
-    private fun showSecurityCodeForRecovery(recovery: PaymentRecovery) {
-        cancelLoading()
-        SecurityCodeActivity.startForRecovery(this, recovery, REQ_CODE_SECURITY_CODE)
-    }
-
-    private fun showSecurityCodeScreen(card: Card, reason: Reason?) {
-        SecurityCodeActivity.startForSavedCard(this, card, reason, REQ_CODE_SECURITY_CODE)
+    private fun showSecurityCodeScreen(securityCodeFragment: SecurityCodeFragment) {
+        activity?.supportFragmentManager?.apply {
+            beginTransaction()
+                .replace(R.id.one_tap_fragment, securityCodeFragment, SecurityCodeFragment.TAG)
+                .addToBackStack(SecurityCodeFragment.TAG)
+                .commitAllowingStateLoss()
+        }
     }
 
     override fun isExploding(): Boolean {
@@ -255,7 +247,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     companion object {
         const val TAG = "TAG_BUTTON_FRAGMENT"
         const val REQ_CODE_CONGRATS = 300
-        private const val REQ_CODE_SECURITY_CODE = 301
         private const val REQ_CODE_PAYMENT_PROCESSOR = 302
         private const val REQ_CODE_BIOMETRICS = 303
         private const val EXTRA_STATE = "extra_state"

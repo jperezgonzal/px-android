@@ -222,7 +222,7 @@ public final class PaymentServiceHandlerWrapper implements PaymentServiceHandler
                 handler.onCvvRequired(card, reason);
             }
             if(eventHandler != null) {
-                eventHandler.getRequireCvvLiveData().setValue(new Event<>(new Pair<>(card, reason)));
+                eventHandler.getRequireCvvLiveData().setValue(new Event<>(reason));
             }
         }
     }

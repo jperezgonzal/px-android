@@ -100,7 +100,7 @@ public class SecurityCodeActivity extends PXActivity<SecurityCodePresenter> impl
         if (context != null) {
             final Card card = recovery.getCard();
             final Intent intent = card != null ? createIntent(context, card) : createIntent(context, recovery);
-            intent.putExtra(EXTRA_PAYMENT_RECOVERY, recovery);
+            intent.putExtra(EXTRA_PAYMENT_RECOVERY, (Parcelable) recovery);
             intent.putExtra(EXTRA_REASON, Reason.from(recovery).name());
             fragment.startActivityForResult(intent, reqCode);
         }
@@ -519,7 +519,7 @@ public class SecurityCodeActivity extends PXActivity<SecurityCodePresenter> impl
             intent.putExtra(EXTRA_TOKEN, token);
             intent.putExtra(EXTRA_CARD, (Parcelable) card);
             intent.putExtra(EXTRA_CARD_INFO, cardInformation);
-            intent.putExtra(EXTRA_PAYMENT_RECOVERY, paymentRecovery);
+            intent.putExtra(EXTRA_PAYMENT_RECOVERY, (Parcelable) paymentRecovery);
             intent.putExtra(EXTRA_REASON, reason.name());
             activity.startActivityForResult(intent, requestCode);
         }

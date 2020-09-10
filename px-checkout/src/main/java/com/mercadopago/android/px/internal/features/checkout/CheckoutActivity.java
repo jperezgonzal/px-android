@@ -22,6 +22,7 @@ import com.mercadopago.android.px.internal.features.express.ExpressPaymentFragme
 import com.mercadopago.android.px.internal.features.payment_vault.PaymentVaultActivity;
 import com.mercadopago.android.px.internal.features.plugins.PaymentProcessorActivity;
 import com.mercadopago.android.px.internal.features.review_and_confirm.ReviewAndConfirmBuilder;
+import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment;
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository;
 import com.mercadopago.android.px.internal.util.ErrorUtil;
 import com.mercadopago.android.px.internal.util.FragmentUtil;
@@ -152,6 +153,10 @@ public class CheckoutActivity extends PXActivity<CheckoutPresenter>
             final Fragment fragment = fragmentManager.findFragmentByTag(CardFormWithFragment.TAG);
             if (fragment != null && fragment.getChildFragmentManager().getBackStackEntryCount() > 0) {
                 fragment.getChildFragmentManager().popBackStack();
+                return;
+            }
+
+            if (earlyExitFromBackHandler(fragmentManager.findFragmentByTag(SecurityCodeFragment.TAG))) {
                 return;
             }
 

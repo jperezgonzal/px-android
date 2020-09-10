@@ -24,6 +24,13 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="CvvToolbarTransparentTheme" parent="Theme.MercadoPagoTheme.NoActionBar">
+        <item name="colorControlNormal">@color/px_real_black</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <style name="ReviewToolbarTheme" parent="Theme.MercadoPagoTheme.NoActionBar">
         <item name="colorControlNormal">@color/px_review_toolbar_text</item>
     </style>

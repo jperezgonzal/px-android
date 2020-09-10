@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -180,7 +181,7 @@ public class GuessingCardActivity extends PXActivity<GuessingCardPresenter> impl
     public static void startGuessingCardActivityForPayment(final Activity activity, final int requestCode,
         @Nullable final PaymentRecovery paymentRecovery) {
         final Intent intent = new Intent(activity, GuessingCardActivity.class);
-        intent.putExtra(PARAM_PAYMENT_RECOVERY, paymentRecovery);
+        intent.putExtra(PARAM_PAYMENT_RECOVERY, (Parcelable) paymentRecovery);
         intent.putExtra(GuessingCardActivity.PARAM_INCLUDES_PAYMENT, true);
         activity.startActivityForResult(intent, requestCode);
     }

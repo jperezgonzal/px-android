@@ -1,7 +1,6 @@
 package com.mercadopago.android.px.internal.features.pay_button
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations.map
 import android.os.Bundle
@@ -26,6 +25,7 @@ import com.mercadopago.android.px.internal.util.SecurityValidationDataFactory
 import com.mercadopago.android.px.internal.viewmodel.BusinessPaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PostPaymentAction
+import com.mercadopago.android.px.internal.viewmodel.custom.MediatorSingleLiveData
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
@@ -59,9 +59,9 @@ internal class PayButtonViewModel(
     private var paymentConfiguration: PaymentConfiguration? = null
     private var paymentModel: PaymentModel? = null
 
-    val cvvRequiredLiveData = MediatorLiveData<Pair<Card, Reason>?>()
-    val recoverRequiredLiveData = MediatorLiveData<PaymentRecovery?>()
-    val stateUILiveData = MediatorLiveData<PayButtonState>()
+    val cvvRequiredLiveData = MediatorSingleLiveData<Pair<PaymentConfiguration, Reason>?>()
+    val recoverRequiredLiveData = MediatorSingleLiveData<Pair<PaymentConfiguration, PaymentRecovery>>()
+    val stateUILiveData = MediatorSingleLiveData<PayButtonState>()
     private var observingService = false
 
     private fun <T : Event<X>, X : Any, I> transform(liveData: LiveData<T>, block: (content: X) -> I): LiveData<I?> {
@@ -87,7 +87,7 @@ internal class PayButtonViewModel(
         if (connectionHelper.checkConnection()) {
             handler?.prePayment(object : OnReadyForPaymentCallback {
                 override fun call(paymentConfiguration: PaymentConfiguration, confirmTrackerData: ConfirmData?) {
-                    if(paymentConfiguration.customOptionId.isNotNullNorEmpty()) {
+                    if (paymentConfiguration.customOptionId.isNotNullNorEmpty()) {
                         paymentSettingRepository.clearToken()
                     }
                     startSecuredPayment(paymentConfiguration, confirmTrackerData)
@@ -117,7 +117,7 @@ internal class PayButtonViewModel(
 
     override fun startPayment() {
         if (paymentService.isExplodingAnimationCompatible) {
-            stateUILiveData.postValue(ButtonLoadingStarted(paymentService.paymentTimeout, buttonConfig))
+            stateUILiveData.value = ButtonLoadingStarted(paymentService.paymentTimeout, buttonConfig)
         }
         handler?.enqueueOnExploding(object : PayButton.OnEnqueueResolvedCallback {
             override fun success() {
@@ -158,13 +158,21 @@ internal class PayButtonViewModel(
         stateUILiveData.addSource(paymentFinishedLiveData) { value -> stateUILiveData.value = value }
 
         // Cvv required event
-        val cvvRequiredLiveData: LiveData<Pair<Card, Reason>?> = transform(serviceLiveData.requireCvvLiveData) { it }
-        this.cvvRequiredLiveData.addSource(cvvRequiredLiveData) { value -> this.cvvRequiredLiveData.value = value }
+        val cvvRequiredLiveData: LiveData<Reason?> = transform(serviceLiveData.requireCvvLiveData) { it }
+        this.cvvRequiredLiveData.addSource(cvvRequiredLiveData) { value ->
+            this.cvvRequiredLiveData.value = Pair(paymentConfiguration!!, value!!)
+            stateUILiveData.value = ButtonLoadingCanceled
+        }
 
         // Invalid esc event
         val recoverRequiredLiveData: LiveData<PaymentRecovery?> =
             transform(serviceLiveData.recoverInvalidEscLiveData) { it.takeIf { it.shouldAskForCvv() } }
-        this.recoverRequiredLiveData.addSource(recoverRequiredLiveData) { value -> this.recoverRequiredLiveData.value = value }
+        this.recoverRequiredLiveData.addSource(recoverRequiredLiveData) { value ->
+            value?.let {
+                paymentRecovery -> this.recoverRequiredLiveData.value = Pair(paymentConfiguration!!, paymentRecovery)
+            }
+            stateUILiveData.value = ButtonLoadingCanceled
+        }
     }
 
     private fun onPaymentProcessingError() {
@@ -205,7 +213,7 @@ internal class PayButtonViewModel(
     }
 
     private fun recoverPayment(recovery: PaymentRecovery) {
-        recoverRequiredLiveData.value = recovery
+        recoverRequiredLiveData.value = Pair(paymentConfiguration!!, recovery)
     }
 
     private fun manageNoConnection() {
