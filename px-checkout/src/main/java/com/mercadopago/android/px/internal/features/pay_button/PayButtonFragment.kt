@@ -228,8 +228,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         activity?.supportFragmentManager?.apply {
             findFragmentByTag(SecurityCodeFragment.TAG).runIfNull {
                 beginTransaction()
-                    .replace(R.id.one_tap_fragment, findFragmentByTag(SecurityCodeFragment.TAG)
-                        ?: securityCodeFragment, SecurityCodeFragment.TAG)
+                    .replace(R.id.one_tap_fragment, securityCodeFragment, SecurityCodeFragment.TAG)
                     .addToBackStack(SecurityCodeFragment.TAG)
                     .commitAllowingStateLoss()
             }
