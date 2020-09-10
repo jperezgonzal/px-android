@@ -174,7 +174,7 @@ public class CheckoutActivity extends PXActivity<CheckoutPresenter>
     }
 
     private boolean earlyExitFromBackHandler(@Nullable final Fragment fragment) {
-        if (fragment != null && fragment.isAdded() && fragment instanceof BackHandler) {
+        if (fragment instanceof BackHandler && fragment.isAdded()) {
             return ((BackHandler) fragment).handleBack();
         }
         return false;
