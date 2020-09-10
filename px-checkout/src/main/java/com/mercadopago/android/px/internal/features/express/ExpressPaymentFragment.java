@@ -139,11 +139,11 @@ public class ExpressPaymentFragment extends Fragment implements ExpressPayment.V
 
     @Override
     public boolean handleBack() {
-        final boolean isExploding = payButtonFragment != null && payButtonFragment.isExploding();
-        if (!isExploding && presenter != null) {
+        final boolean isExploding = payButtonFragment.isExploding();
+        if (!isExploding) {
             presenter.onBack();
         }
-        return isExploding || (offlineMethodsFragment != null && offlineMethodsFragment.handleBack());
+        return isExploding || offlineMethodsFragment.handleBack();
     }
 
     public interface CallBack {
