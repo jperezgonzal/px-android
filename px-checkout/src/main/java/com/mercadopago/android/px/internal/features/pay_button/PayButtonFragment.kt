@@ -17,6 +17,7 @@ import com.mercadopago.android.px.addons.BehaviourProvider
 import com.mercadopago.android.px.addons.internal.SecurityValidationHandler
 import com.mercadopago.android.px.addons.model.SecurityValidationData
 import com.mercadopago.android.px.internal.di.viewModel
+import com.mercadopago.android.px.internal.extensions.runIfNull
 import com.mercadopago.android.px.internal.extensions.showSnackBar
 import com.mercadopago.android.px.internal.features.Constants
 import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultActivity
@@ -225,11 +226,13 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     private fun showSecurityCodeScreen(securityCodeFragment: SecurityCodeFragment) {
         activity?.supportFragmentManager?.apply {
-            beginTransaction()
-                .replace(R.id.one_tap_fragment, findFragmentByTag(SecurityCodeFragment.TAG)
-                    ?: securityCodeFragment, SecurityCodeFragment.TAG)
-                .addToBackStack(SecurityCodeFragment.TAG)
-                .commitAllowingStateLoss()
+            findFragmentByTag(SecurityCodeFragment.TAG).runIfNull {
+                beginTransaction()
+                    .replace(R.id.one_tap_fragment, findFragmentByTag(SecurityCodeFragment.TAG)
+                        ?: securityCodeFragment, SecurityCodeFragment.TAG)
+                    .addToBackStack(SecurityCodeFragment.TAG)
+                    .commitAllowingStateLoss()
+            }
         }
     }
 
@@ -242,7 +245,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     companion object {
         const val TAG = "TAG_BUTTON_FRAGMENT"
         const val REQ_CODE_CONGRATS = 300
-        const val RETRIES_CONFIGURATION_EXTRA = "retries_configuration"
         private const val REQ_CODE_PAYMENT_PROCESSOR = 302
         private const val REQ_CODE_BIOMETRICS = 303
         private const val EXTRA_STATE = "extra_state"

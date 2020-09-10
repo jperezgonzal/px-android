@@ -45,7 +45,7 @@ class SecurityCodeViewModel(
     private lateinit var paymentConfiguration: PaymentConfiguration
     private var paymentRecovery: PaymentRecovery? = null
     private var reason: Reason? = null
-    private var cardUserSelection: Card = userSelectionRepository.card ?: error("")
+    private var cardUserSelection: Card = userSelectionRepository.card ?: error("Card selected not be null")
     private var cvvInfo: CvvInfo? = cardUserSelection.paymentMethod?.displayInfo?.cvvInfo
 
     init {
@@ -55,9 +55,9 @@ class SecurityCodeViewModel(
             val initResponse = initRepository.loadInitResponse()
             val cardDisplayInfo = initResponse?.let { response ->
                 val expressMetadata = response.express.find { data -> data.isCard && data.card.id == cardUserSelection.id }
-                    ?: error("")
+                    ?: error("ExpressMetadata not be null")
                 expressMetadata.card?.displayInfo
-            } ?: error("")
+            } ?: error("DisplayInfo not be null")
 
             cvvCardUiMutableLiveData.postValue(cardConfigurationMapper.map(cardDisplayInfo))
         }
