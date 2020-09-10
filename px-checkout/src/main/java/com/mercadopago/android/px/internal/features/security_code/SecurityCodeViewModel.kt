@@ -34,13 +34,13 @@ class SecurityCodeViewModel(
 
     private val cvvCardUiMutableLiveData = MutableLiveData<CardDrawerConfiguration>()
     val cvvCardUiLiveData:LiveData<CardDrawerConfiguration>
-    get() = cvvCardUiMutableLiveData
+        get() = cvvCardUiMutableLiveData
     private val virtualCardInfoMutableLiveData = MutableLiveData<VirtualCardInfo>()
     val virtualCardInfoLiveData: LiveData<VirtualCardInfo>
-    get() = virtualCardInfoMutableLiveData
+        get() = virtualCardInfoMutableLiveData
     private val inputInfoMutableLiveData = MutableLiveData<Int>()
     val inputInfoLiveData: LiveData<Int>
-    get() = inputInfoMutableLiveData
+        get() = inputInfoMutableLiveData
 
     private lateinit var paymentConfiguration: PaymentConfiguration
     private var paymentRecovery: PaymentRecovery? = null

@@ -3,13 +3,13 @@ package com.mercadopago.android.px.internal.viewmodel.custom
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class MediatorSingleLiveData<T> : MediatorLiveData<T>(), SingleLiveData<T> {
+class MutableSingleLiveData<T> : MutableLiveData<T>(), SingleLiveData<T> {
 
-    override val tag = "MediatorSingleLiveData"
+    override val tag = "MutableSingleLiveData"
     override val pendingAtomicBoolean = AtomicBoolean(false)
 
     @MainThread
