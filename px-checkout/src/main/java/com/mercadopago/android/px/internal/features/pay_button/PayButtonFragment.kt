@@ -217,7 +217,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     }
 
     private fun showConfirmButton() {
-        enable()
         with(button) {
             clearAnimation()
             visibility = VISIBLE

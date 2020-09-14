@@ -130,6 +130,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
     }
 
     override fun resolvePaymentError(error: MercadoPagoError): Boolean {
+        payButtonFragment.enable()
         when {
             error.isNoConnectivityError -> resolveConnectionError()
             !error.isPaymentProcessing -> {
