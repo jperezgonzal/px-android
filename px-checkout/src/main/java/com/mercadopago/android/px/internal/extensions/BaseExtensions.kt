@@ -15,13 +15,7 @@ internal fun Any?.runIfNull(action: () -> Unit) {
     }
 }
 
-internal inline fun <reified T, R> Any?.otherwiseWith(param: T?, action: (T) -> R): R = if (param != null) {
-    action.invoke(param)
-} else {
-    error("${T::class.java.simpleName} not be null")
-}
-
-internal inline fun <reified T> Any?.notNull(param: T?) = param ?: error("${T::class.java.simpleName} not be null")
+internal inline fun <reified T> notNull(param: T?) = param ?: error("${T::class.java.simpleName} not be null")
 
 internal inline fun <T : Any?, R> T?.runIfNotNull(action: (T) -> R): R? = this?.run { action(this) }
 

@@ -37,13 +37,8 @@ class SecurityCodeViewModel(
     init {
         displayInfoUseCase.execute(Unit, success = { triple ->
             val (cardDisplayInfo, cvvInfo, securityCodeLength) = triple
-
-            cardDisplayInfo.runIfNotNull {
-                cvvCardUiMutableLiveData.postValue(CardDrawerConfiguration(cardDisplayInfo, null))
-            }
-            cvvInfo.runIfNotNull {
-                virtualCardInfoMutableLiveData.value = VirtualCardInfo(it.title, it.message)
-            }
+            cardDisplayInfo?.let { cvvCardUiMutableLiveData.postValue(CardDrawerConfiguration(cardDisplayInfo, null)) }
+            cvvInfo?.let { virtualCardInfoMutableLiveData.value = VirtualCardInfo(it.title, it.message) }
             inputInfoMutableLiveData.value = securityCodeLength
         }, failure = {
             //TODO: Friction

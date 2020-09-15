@@ -1,7 +1,7 @@
 package com.mercadopago.android.px.internal.base.use_case
 
 import com.mercadopago.android.px.addons.ESCManagerBehaviour
-import com.mercadopago.android.px.internal.extensions.otherwiseWith
+import com.mercadopago.android.px.internal.extensions.notNull
 import com.mercadopago.android.px.internal.extensions.runIfNotNull
 import com.mercadopago.android.px.internal.repository.CardTokenRepository
 import com.mercadopago.android.px.internal.repository.UserSelectionRepository
@@ -18,7 +18,7 @@ class TokenizeUseCase(
 
     override suspend fun buildUseCase(param: TokenizeParams) = param.paymentRecovery.runIfNotNull {
         CVVRecoveryWrapper(cardTokenRepository, escManagerBehaviour, it).recoverWithCVV(param.securityCode)
-    }.otherwiseWith(userSelectionRepository.card) {
+    } ?: notNull(userSelectionRepository.card).let {
         TokenCreationWrapper
             .Builder(cardTokenRepository, escManagerBehaviour)
             .with(it)
