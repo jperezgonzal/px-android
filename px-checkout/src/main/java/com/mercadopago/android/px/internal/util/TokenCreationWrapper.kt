@@ -4,7 +4,7 @@ import com.mercadopago.android.px.addons.ESCManagerBehaviour
 import com.mercadopago.android.px.internal.callbacks.awaitTaggedCallback
 import com.mercadopago.android.px.internal.extensions.isNotNullNorEmpty
 import com.mercadopago.android.px.internal.repository.CardTokenRepository
-import com.mercadopago.android.px.internal.services.Response
+import com.mercadopago.android.px.internal.base.response.Response
 import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.exceptions.CardTokenException
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError

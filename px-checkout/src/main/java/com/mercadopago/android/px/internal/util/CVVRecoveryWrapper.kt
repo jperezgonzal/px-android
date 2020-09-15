@@ -3,7 +3,7 @@ package com.mercadopago.android.px.internal.util
 import com.mercadopago.android.px.addons.ESCManagerBehaviour
 import com.mercadopago.android.px.internal.extensions.isNotNullNorEmpty
 import com.mercadopago.android.px.internal.repository.CardTokenRepository
-import com.mercadopago.android.px.internal.services.Response
+import com.mercadopago.android.px.internal.base.response.Response
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.Token
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError

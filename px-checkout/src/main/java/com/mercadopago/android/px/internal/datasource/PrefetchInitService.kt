@@ -3,7 +3,7 @@ package com.mercadopago.android.px.internal.datasource
 import com.mercadopago.android.px.addons.ESCManagerBehaviour
 import com.mercadopago.android.px.core.MercadoPagoCheckout
 import com.mercadopago.android.px.internal.services.CheckoutService
-import com.mercadopago.android.px.internal.services.Response
+import com.mercadopago.android.px.internal.base.response.Response
 import com.mercadopago.android.px.internal.callbacks.awaitCallback
 import com.mercadopago.android.px.internal.tracking.TrackingRepository
 import com.mercadopago.android.px.internal.util.JsonUtil
