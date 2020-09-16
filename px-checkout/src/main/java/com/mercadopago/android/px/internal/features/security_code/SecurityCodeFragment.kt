@@ -77,10 +77,12 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
                 "PaymentRecovery or PaymentConfiguration and Reason are needed"
             }
 
+            val paymentRecovery = getParcelable<PaymentRecovery>(EXTRA_PAYMENT_RECOVERY)
+            val reason = paymentRecovery?.let { Reason.from(it) } ?: getString(EXTRA_REASON)?.let { Reason.valueOf(it) }
             securityCodeViewModel.init(
                 getParcelable(EXTRA_PAYMENT_CONFIGURATION)!!,
-                getParcelable(EXTRA_PAYMENT_RECOVERY),
-                getString(EXTRA_REASON)?.let { Reason.valueOf(it) })
+                paymentRecovery,
+                reason!!)
 
         } ?: error("Arguments not be null")
 
@@ -134,6 +136,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         when {
             error.isNoConnectivityError -> resolveConnectionError()
             !error.isPaymentProcessing -> {
+                securityCodeViewModel.onPaymentError()
                 val action = AndesSnackbarAction(
                     getString(R.string.px_snackbar_error_action),
                     View.OnClickListener { activity?.onBackPressed() }
@@ -145,6 +148,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
     }
 
     private fun resolveConnectionError() {
+        securityCodeViewModel.onConnectionError()
         if (retryCounter < MAXIMUM_RETRIES) {
             retryCounter += 1
             view.showSnackBar(
@@ -160,7 +164,7 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         }
     }
 
-    override fun handleBack() = payButtonFragment.isExploding()
+    override fun handleBack() = payButtonFragment.isExploding().also { securityCodeViewModel.onBack() }
 
     companion object {
         const val TAG = "security_code"

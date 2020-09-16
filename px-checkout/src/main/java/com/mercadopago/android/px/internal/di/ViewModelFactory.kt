@@ -6,8 +6,9 @@ import com.mercadopago.android.px.internal.core.ConnectionHelper
 import com.mercadopago.android.px.internal.features.express.offline_methods.OfflineMethodsViewModel
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonViewModel
 import com.mercadopago.android.px.internal.features.security_code.SecurityCodeViewModel
-import com.mercadopago.android.px.internal.features.security_code.use_case.DisplayInfoUseCase
+import com.mercadopago.android.px.internal.features.security_code.use_case.DisplayDataUseCase
 import com.mercadopago.android.px.internal.base.use_case.TokenizeUseCase
+import com.mercadopago.android.px.internal.features.security_code.tracking.*
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 
 internal class ViewModelFactory : ViewModelProvider.Factory {
@@ -15,19 +16,21 @@ internal class ViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         val session = Session.getInstance()
         val configurationModule = session.configurationModule
+        val paymentSetting = configurationModule.paymentSettings
+        val userSelectionRepository = configurationModule.userSelectionRepository
 
         return when {
             modelClass.isAssignableFrom(PayButtonViewModel::class.java) -> {
                 PayButtonViewModel(session.paymentRepository,
                     configurationModule.productIdProvider,
                     ConnectionHelper.instance,
-                    configurationModule.paymentSettings,
+                    paymentSetting,
                     configurationModule.customTextsRepository,
                     PayButtonViewModelMapper())
             }
             modelClass.isAssignableFrom(OfflineMethodsViewModel::class.java) -> {
                 OfflineMethodsViewModel(session.initRepository,
-                    configurationModule.paymentSettings,
+                    paymentSetting,
                     session.amountRepository,
                     session.discountRepository)
             }
@@ -35,12 +38,13 @@ internal class ViewModelFactory : ViewModelProvider.Factory {
                 val tokenizeUseCase = TokenizeUseCase(
                     session.cardTokenRepository,
                     session.mercadoPagoESC,
-                    configurationModule.userSelectionRepository)
+                    userSelectionRepository)
 
                 SecurityCodeViewModel(
                     configurationModule.paymentSettings,
                     tokenizeUseCase,
-                    DisplayInfoUseCase(session.initRepository, configurationModule.userSelectionRepository))
+                    SecurityCodeTracker(SecurityCodeViewTrack(), SecurityCodeEventTrack(), SecurityCodeFrictions()),
+                    DisplayDataUseCase(session.initRepository, userSelectionRepository))
             }
             else -> {
                 throw IllegalArgumentException("Unknown ViewModel class")

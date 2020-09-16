@@ -15,6 +15,9 @@ open class FrictionEventTracker protected constructor(private val path: String, 
     enum class Id(val value: String) {
         GENERIC("px_generic_error"),
         SILENT("px_silent_error"),
+        TOKEN_API_ERROR("token_api_error"),
+        PAYMENTS_API_ERROR("payments_api_error"),
+        NO_CONNECTION("no_connection"),
         INVALID_BIN("invalid_bin"),
         INVALID_CC_NUMBER("invalid_cc_number"),
         INVALID_NAME("invalid_name"),
@@ -57,6 +60,7 @@ open class FrictionEventTracker protected constructor(private val path: String, 
         private const val ATTR_ATTRIBUTABLE = "attributable_to"
         private const val VALUE_ATTRIBUTABLE = "mercadopago"
         private const val ATTR_EXTRA_INFO = "extra_info"
+        private const val MESSAGE_EXTRA_INFO = "message"
 
         @JvmStatic
         fun with(fId: Id, track: TrackWrapper, style: Style, mercadoPagoError: MercadoPagoError): FrictionEventTracker {
