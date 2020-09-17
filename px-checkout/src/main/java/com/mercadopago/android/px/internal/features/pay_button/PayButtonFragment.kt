@@ -41,7 +41,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     private var buttonStatus = MeliButton.State.NORMAL
     private lateinit var button: MeliButton
-    private var retryCounter = 0
     private val viewModel: PayButtonViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -67,7 +66,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             buttonStatus = it.getInt(EXTRA_STATE, MeliButton.State.NORMAL)
             button.visibility = it.getInt(EXTRA_VISIBILITY, VISIBLE)
             viewModel.recoverFromBundle(it)
-            retryCounter = it.getInt(RETRY_COUNTER, 0)
         }
         updateButtonState()
 
@@ -86,7 +84,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         super.onSaveInstanceState(outState)
         outState.putInt(EXTRA_STATE, buttonStatus)
         outState.putInt(EXTRA_VISIBILITY, button.visibility)
-        outState.putInt(RETRY_COUNTER, retryCounter)
         viewModel.storeInBundle(outState)
     }
 
@@ -271,8 +268,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     companion object {
         const val TAG = "TAG_BUTTON_FRAGMENT"
-        private const val MAXIMUM_RETRIES = 3
-        private const val RETRY_COUNTER = "retry_counter"
         const val REQ_CODE_CONGRATS = 300
         private const val REQ_CODE_PAYMENT_PROCESSOR = 302
         private const val REQ_CODE_BIOMETRICS = 303
