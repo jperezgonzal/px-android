@@ -41,6 +41,9 @@ class SecurityCodeViewModel(
     private val inputInfoMutableLiveData = MutableLiveData<Int>()
     val inputInfoLiveData: LiveData<Int>
         get() = inputInfoMutableLiveData
+    private val tokenizeErrorApiMutableLiveData = MutableLiveData<Unit>()
+    val tokenizeErrorApiLiveData: LiveData<Unit>
+        get() = tokenizeErrorApiMutableLiveData
 
     private lateinit var paymentConfiguration: PaymentConfiguration
     private var paymentRecovery: PaymentRecovery? = null
@@ -94,7 +97,10 @@ class SecurityCodeViewModel(
                 response.resolve(success = { token ->
                     paymentSettingRepository.configure(token)
                     callback.success()
-                }, error = { callback.failure(it) })
+                }, error = {
+                    tokenizeErrorApiMutableLiveData.value = Unit
+                    callback.failure()
+                })
             }
         }
     }

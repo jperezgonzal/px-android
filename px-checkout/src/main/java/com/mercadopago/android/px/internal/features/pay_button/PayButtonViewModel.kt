@@ -50,7 +50,7 @@ internal class PayButtonViewModel(
     val buttonTextLiveData = MutableLiveData<ButtonConfig>()
     private var buttonConfig: ButtonConfig = payButtonViewModelMapper.map(customTextsRepository.customTexts)
     private val connectivityError = MercadoPagoError(ApiUtil.getApiException(NoConnectivityException()), null)
-    private val connectionError = UIError.ConnectionError(connectivityError)
+    private var retryCounter = 0
 
     init {
         buttonTextLiveData.value = buttonConfig
@@ -128,10 +128,8 @@ internal class PayButtonViewModel(
                 confirmTrackerData?.let { ConfirmEvent(it).track() }
             }
 
-            override fun failure(error: MercadoPagoError) {
-                handler?.takeIf { it.resolvePaymentError(error) }
-                    ?.let { stateUILiveData.value = ButtonLoadingCanceled }
-                    ?: let { stateUILiveData.value = UIError.BusinessError(error) }
+            override fun failure() {
+               stateUILiveData.value = ButtonLoadingCanceled
             }
         })
     }
@@ -142,7 +140,8 @@ internal class PayButtonViewModel(
         val paymentErrorLiveData: LiveData<ButtonLoadingCanceled?> =
             transform(serviceLiveData.paymentErrorLiveData) { error ->
                 val shouldHandleError = error.isPaymentProcessing
-                if (shouldHandleError) onPaymentProcessingError(error) else noRecoverableError(error)
+                if (shouldHandleError) onPaymentProcessingError() else noRecoverableError(error)
+                handler?.onPaymentError(error)
                 ButtonLoadingCanceled
             }
         stateUILiveData.addSource(paymentErrorLiveData) { value -> stateUILiveData.value = value }
@@ -178,14 +177,13 @@ internal class PayButtonViewModel(
         }
     }
 
-    private fun onPaymentProcessingError(error: MercadoPagoError) {
+    private fun onPaymentProcessingError() {
         val currency: Currency = paymentSettingRepository.currency
         val paymentResult: PaymentResult = PaymentResult.Builder()
             .setPaymentData(paymentService.paymentDataList)
             .setPaymentStatus(Payment.StatusCodes.STATUS_IN_PROCESS)
             .setPaymentStatusDetail(Payment.StatusDetail.STATUS_DETAIL_PENDING_CONTINGENCY)
             .build()
-        handler?.resolvePaymentError(error)
         onPostPayment(PaymentModel(paymentResult, currency))
     }
 
@@ -222,8 +220,7 @@ internal class PayButtonViewModel(
 
     private fun manageNoConnection() {
         trackNoRecoverableFriction(connectivityError)
-        handler?.takeIf { it.resolvePaymentError(connectivityError) }
-            ?: let { stateUILiveData.value = connectionError }
+        stateUILiveData.value = UIError.ConnectionError(++retryCounter)
     }
 
     private fun trackNoRecoverableFriction(error: MercadoPagoError) {
@@ -233,8 +230,7 @@ internal class PayButtonViewModel(
 
     private fun noRecoverableError(error: MercadoPagoError) {
         trackNoRecoverableFriction(error)
-        handler?.takeIf { it.resolvePaymentError(error) }
-            ?: let { stateUILiveData.value = UIError.BusinessError(error) }
+        stateUILiveData.value = UIError.BusinessError
     }
 
     override fun hasFinishPaymentAnimation() {
@@ -264,6 +260,7 @@ internal class PayButtonViewModel(
         bundle.putParcelable(BUNDLE_CONFIRM_DATA, confirmTrackerData)
         bundle.putParcelable(BUNDLE_PAYMENT_MODEL, paymentModel)
         bundle.putBoolean(BUNDLE_OBSERVING_SERVICE, observingService)
+        bundle.putInt(RETRY_COUNTER, retryCounter)
     }
 
     override fun recoverFromBundle(bundle: Bundle) {
@@ -271,6 +268,7 @@ internal class PayButtonViewModel(
         confirmTrackerData = bundle.getParcelable(BUNDLE_CONFIRM_DATA)
         paymentModel = bundle.getParcelable(BUNDLE_PAYMENT_MODEL)
         observingService = bundle.getBoolean(BUNDLE_OBSERVING_SERVICE)
+        retryCounter = bundle.getInt(RETRY_COUNTER,0)
         if (observingService) {
             observeService(paymentService.observableEvents)
         }
@@ -281,5 +279,7 @@ internal class PayButtonViewModel(
         const val BUNDLE_CONFIRM_DATA = "BUNDLE_CONFIRM_DATA"
         const val BUNDLE_PAYMENT_MODEL = "BUNDLE_PAYMENT_MODEL"
         const val BUNDLE_OBSERVING_SERVICE = "BUNDLE_OBSERVING_SERVICE"
+        private const val RETRY_COUNTER = "retry_counter"
+
     }
 }

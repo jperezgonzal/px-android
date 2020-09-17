@@ -35,7 +35,7 @@ interface PayButton {
         @JvmDefault fun enqueueOnExploding(callback: OnEnqueueResolvedCallback) = callback.success()
         @JvmDefault fun onPostPaymentAction(postPaymentAction: PostPaymentAction) = Unit
         @JvmDefault fun onPaymentFinished(paymentModel: PaymentModel, callback: OnPaymentFinishedCallback) = callback.call()
-        @JvmDefault fun resolvePaymentError(error: MercadoPagoError) = false
+        @JvmDefault fun onPaymentError(error: MercadoPagoError) = Unit
     }
 
     interface OnReadyForPaymentCallback {
@@ -44,7 +44,7 @@ interface PayButton {
 
     interface OnEnqueueResolvedCallback {
         fun success()
-        fun failure(error: MercadoPagoError)
+        fun failure()
     }
 
     interface OnPaymentFinishedCallback {

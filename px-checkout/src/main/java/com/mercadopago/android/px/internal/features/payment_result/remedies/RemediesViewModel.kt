@@ -121,7 +121,7 @@ internal class RemediesViewModel(
                     response.resolve(success = { token ->
                         paymentSettingRepository.configure(token)
                         callback.success()
-                    }, error = { callback.failure(it) })
+                    }, error = { callback.failure() })
                 }
             }
         } ?: callback.success()
@@ -139,7 +139,7 @@ internal class RemediesViewModel(
                     paymentSettingRepository.configure(token)
                     RemedyEvent(getRemedyTrackData(RemedyType.CVV_REQUEST)).track()
                     callback.success()
-                }, error = { callback.failure(it) })
+                }, error = { callback.failure() })
             }
         }
     }
