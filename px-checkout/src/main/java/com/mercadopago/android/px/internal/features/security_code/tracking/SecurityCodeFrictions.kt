@@ -29,6 +29,5 @@ class SecurityCodeFrictions {
             frictionId,
             FrictionEventTracker.Style.SNACKBAR,
             data).track()
-
     }
 }
