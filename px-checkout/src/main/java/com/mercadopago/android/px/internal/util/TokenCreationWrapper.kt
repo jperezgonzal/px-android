@@ -1,6 +1,7 @@
 package com.mercadopago.android.px.internal.util
 
 import com.mercadopago.android.px.addons.ESCManagerBehaviour
+import com.mercadopago.android.px.addons.model.EscDeleteReason
 import com.mercadopago.android.px.internal.callbacks.awaitTaggedCallback
 import com.mercadopago.android.px.internal.extensions.isNotNullNorEmpty
 import com.mercadopago.android.px.internal.repository.CardTokenRepository
@@ -9,6 +10,7 @@ import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.exceptions.CardTokenException
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import com.mercadopago.android.px.tracking.internal.model.Reason
+import kotlin.coroutines.resume
 
 internal class TokenCreationWrapper private constructor(builder: Builder) {
 
@@ -75,7 +77,14 @@ internal class TokenCreationWrapper private constructor(builder: Builder) {
 
     private suspend fun createESCToken(savedESCCardToken: SavedESCCardToken) = cardTokenRepository
         .createToken(savedESCCardToken)
-        .awaitTaggedCallback(ApiUtil.RequestOrigin.CREATE_TOKEN)
+        .awaitTaggedCallback(ApiUtil.RequestOrigin.CREATE_TOKEN).apply {
+            resolve(success = {
+                if (Reason.ESC_CAP == reason) { // Remove previous esc for tracking purpose
+                    escManagerBehaviour.deleteESCWith(savedESCCardToken.cardId, EscDeleteReason.ESC_CAP, null)
+                }
+                cardTokenRepository.clearCap(savedESCCardToken.cardId) {}
+            })
+        }
 
     private suspend fun createToken(savedCardToken: SavedCardToken) = cardTokenRepository
         .createToken(savedCardToken)
