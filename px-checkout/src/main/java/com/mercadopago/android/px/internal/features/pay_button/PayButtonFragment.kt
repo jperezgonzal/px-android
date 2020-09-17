@@ -271,7 +271,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     companion object {
         const val TAG = "TAG_BUTTON_FRAGMENT"
-        private const val MAXIMUM_RETRIES = 3
         private const val RETRY_COUNTER = "retry_counter"
         const val REQ_CODE_CONGRATS = 300
         private const val REQ_CODE_PAYMENT_PROCESSOR = 302
