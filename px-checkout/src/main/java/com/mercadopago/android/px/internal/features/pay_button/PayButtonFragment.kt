@@ -11,6 +11,9 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import com.mercadolibre.android.andesui.snackbar.action.AndesSnackbarAction
+import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration
+import com.mercadolibre.android.andesui.snackbar.type.AndesSnackbarType
 import com.mercadolibre.android.ui.widgets.MeliButton
 import com.mercadopago.android.px.R
 import com.mercadopago.android.px.addons.BehaviourProvider
@@ -38,6 +41,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     private var buttonStatus = MeliButton.State.NORMAL
     private lateinit var button: MeliButton
+    private var retryCounter = 0
     private val viewModel: PayButtonViewModel by viewModel()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -63,6 +67,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             buttonStatus = it.getInt(EXTRA_STATE, MeliButton.State.NORMAL)
             button.visibility = it.getInt(EXTRA_VISIBILITY, VISIBLE)
             viewModel.recoverFromBundle(it)
+            retryCounter = it.getInt(RETRY_COUNTER, 0)
         }
         updateButtonState()
 
@@ -81,6 +86,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         super.onSaveInstanceState(outState)
         outState.putInt(EXTRA_STATE, buttonStatus)
         outState.putInt(EXTRA_VISIBILITY, button.visibility)
+        outState.putInt(RETRY_COUNTER, retryCounter)
         viewModel.storeInBundle(outState)
     }
 
@@ -124,9 +130,31 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         BehaviourProvider.getSecurityBehaviour().startValidation(this, validationData, REQ_CODE_BIOMETRICS)
     }
 
+    private fun resolveConnectionError(uiError: UIError.ConnectionError) {
+        var action: AndesSnackbarAction? = null
+        var type = AndesSnackbarType.NEUTRAL
+        var duration = AndesSnackbarDuration.SHORT
+
+        uiError.actionMessage?.also {
+            action = AndesSnackbarAction(getString(it), View.OnClickListener { activity?.onBackPressed() })
+            type = AndesSnackbarType.ERROR
+            duration = AndesSnackbarDuration.LONG
+        }
+
+        view.showSnackBar(getString(uiError.message), type, duration, action)
+    }
+
     private fun resolveError(uiError: UIError) {
-        cancelLoading()
-        view.showSnackBar(getString(uiError.resMessage))
+        when (uiError) {
+            is UIError.ConnectionError -> resolveConnectionError(uiError)
+            else -> {
+                val action = AndesSnackbarAction(
+                    getString(R.string.px_snackbar_error_action), View.OnClickListener {
+                    activity?.onBackPressed()
+                })
+                view.showSnackBar(getString(R.string.px_error_title), andesSnackbarAction = action)
+            }
+        }
     }
 
     override fun onAnimationFinished() {
@@ -203,6 +231,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
                 .commitNowAllowingStateLoss()
             restoreStatusBar()
         }
+        enable()
     }
 
     private fun restoreStatusBar() {
@@ -242,6 +271,8 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     companion object {
         const val TAG = "TAG_BUTTON_FRAGMENT"
+        private const val MAXIMUM_RETRIES = 3
+        private const val RETRY_COUNTER = "retry_counter"
         const val REQ_CODE_CONGRATS = 300
         private const val REQ_CODE_PAYMENT_PROCESSOR = 302
         private const val REQ_CODE_BIOMETRICS = 303

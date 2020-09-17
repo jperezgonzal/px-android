@@ -8,7 +8,6 @@ import com.mercadopago.android.px.internal.features.security_code.model.VirtualC
 import com.mercadopago.android.px.internal.features.security_code.use_case.DisplayInfoUseCase
 import com.mercadopago.android.px.internal.base.use_case.TokenizeParams
 import com.mercadopago.android.px.internal.base.use_case.TokenizeUseCase
-import com.mercadopago.android.px.internal.extensions.runIfNotNull
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
 import com.mercadopago.android.px.internal.viewmodel.CardDrawerConfiguration
 import com.mercadopago.android.px.model.PaymentRecovery
@@ -29,6 +28,9 @@ class SecurityCodeViewModel(
     private val inputInfoMutableLiveData = MutableLiveData<Int>()
     val inputInfoLiveData: LiveData<Int>
         get() = inputInfoMutableLiveData
+    private val tokenizeErrorApiMutableLiveData = MutableLiveData<Unit>()
+    val tokenizeErrorApiLiveData: LiveData<Unit>
+        get() = tokenizeErrorApiMutableLiveData
 
     private lateinit var paymentConfiguration: PaymentConfiguration
     private var paymentRecovery: PaymentRecovery? = null
@@ -60,6 +62,9 @@ class SecurityCodeViewModel(
             success = { token ->
                 paymentSettingRepository.configure(token)
                 callback.success()
-            }, failure = { error -> callback.failure(error) })
+            }, failure = {
+            tokenizeErrorApiMutableLiveData.value = Unit
+            callback.failure()
+        })
     }
 }
