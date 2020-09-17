@@ -24,16 +24,10 @@ internal open class UIResult : PayButtonState() {
 }
 
 internal open class UIError : PayButtonState() {
-    class ConnectionError(private val retriesCount: Int): UIError() {
+    class ConnectionError(retriesCount: Int) : UIError() {
         private val maxRetries = 3
-        private val neutralMessage = R.string.px_connectivity_neutral_error
-        private val errorMessage = R.string.px_connectivity_error
-
-        val message: Int
-            get() = if (retriesCount <= maxRetries) neutralMessage else errorMessage
-        val actionMessage: Int?
-            get() = if (retriesCount > maxRetries) R.string.px_snackbar_error_action else null
-
+        val message = if (retriesCount <= maxRetries) R.string.px_connectivity_neutral_error else R.string.px_connectivity_error
+        val actionMessage = if (retriesCount > maxRetries) R.string.px_snackbar_error_action else null
     }
     object BusinessError : UIError()
 }
