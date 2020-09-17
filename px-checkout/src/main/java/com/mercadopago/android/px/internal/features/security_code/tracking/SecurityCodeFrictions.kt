@@ -2,6 +2,7 @@ package com.mercadopago.android.px.internal.features.security_code.tracking
 
 import com.mercadopago.android.px.tracking.internal.events.FrictionEventTracker
 import com.mercadopago.android.px.tracking.internal.model.TrackingMapModel
+import java.util.*
 
 class SecurityCodeFrictions {
     private val data = mutableMapOf<String, Any>()
@@ -14,7 +15,7 @@ class SecurityCodeFrictions {
         val frictionId = FrictionEventTracker.Id.PAYMENTS_API_ERROR
 
         FrictionEventTracker.with(
-            "${SecurityCodeTrack.ACTION_BASE_PATH}/${frictionId.name}",
+            "${SecurityCodeTrack.ACTION_BASE_PATH}/${frictionId.name.toLowerCase(Locale.getDefault())}",
             frictionId,
             FrictionEventTracker.Style.SNACKBAR,
             data).track()
@@ -24,7 +25,7 @@ class SecurityCodeFrictions {
         val frictionId = FrictionEventTracker.Id.TOKEN_API_ERROR
 
         FrictionEventTracker.with(
-            "${SecurityCodeTrack.ACTION_BASE_PATH}/${frictionId.name}",
+            "${SecurityCodeTrack.ACTION_BASE_PATH}/${frictionId.name.toLowerCase(Locale.getDefault())}",
             frictionId,
             FrictionEventTracker.Style.SNACKBAR,
             data).track()
