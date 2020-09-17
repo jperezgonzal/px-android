@@ -26,10 +26,6 @@ class SecurityCodeTracker(
         securityCodeEventTrack.trackAbortSecurityCode()
     }
 
-    fun trackConnectionError() {
-        securityCodeFrictions.trackNoConnectionError()
-    }
-
     fun trackPaymentApiError() {
         securityCodeFrictions.trackPaymentApiError()
     }

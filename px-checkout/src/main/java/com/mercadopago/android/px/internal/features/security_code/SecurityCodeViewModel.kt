@@ -30,6 +30,9 @@ class SecurityCodeViewModel(
     private val inputInfoMutableLiveData = MutableLiveData<Int>()
     val inputInfoLiveData: LiveData<Int>
         get() = inputInfoMutableLiveData
+    private val tokenizeErrorApiMutableLiveData = MutableLiveData<Unit>()
+    val tokenizeErrorApiLiveData: LiveData<Unit>
+        get() = tokenizeErrorApiMutableLiveData
 
     private lateinit var paymentConfiguration: PaymentConfiguration
     private var paymentRecovery: PaymentRecovery? = null
@@ -57,10 +60,6 @@ class SecurityCodeViewModel(
         securityCodeTracker.trackPaymentApiError()
     }
 
-    fun onConnectionError() {
-        securityCodeTracker.trackConnectionError()
-    }
-
     fun handlePrepayment(callback: PayButton.OnReadyForPaymentCallback) {
         securityCodeTracker.trackConfirmSecurityCode()
         callback.call(paymentConfiguration)
@@ -71,6 +70,11 @@ class SecurityCodeViewModel(
             success = { token ->
                 paymentSettingRepository.configure(token)
                 callback.success()
-            }, failure = { error -> callback.failure(error) })
+            },
+            failure = {
+                securityCodeTracker.trackTokenApiError()
+                tokenizeErrorApiMutableLiveData.value = Unit
+                callback.failure()
+            })
     }
 }

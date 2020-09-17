@@ -15,8 +15,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.meli.android.carddrawer.model.CardDrawerView
 import com.mercadolibre.android.andesui.snackbar.action.AndesSnackbarAction
-import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration
-import com.mercadolibre.android.andesui.snackbar.type.AndesSnackbarType
 import com.mercadopago.android.px.R
 import com.mercadopago.android.px.core.BackHandler
 import com.mercadopago.android.px.internal.di.viewModel
@@ -39,7 +37,6 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
     private lateinit var cvvTitle: TextView
     private lateinit var cvvSubtitle: TextView
     private lateinit var payButtonFragment: PayButtonFragment
-    private var retryCounter = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
@@ -86,15 +83,8 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
 
         } ?: error("Arguments not be null")
 
-        savedInstanceState?.apply { retryCounter = getInt(RETRY_COUNTER, 0) }
-
         payButtonFragment = childFragmentManager.findFragmentById(R.id.pay_button) as PayButtonFragment
         observeViewModel()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt(RETRY_COUNTER, retryCounter)
     }
 
     private fun observeViewModel() {
@@ -117,6 +107,14 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
                 }
             }
 
+            tokenizeErrorApiLiveData.nonNullObserve(viewLifecycleOwner) {
+                val action = AndesSnackbarAction(
+                    getString(R.string.px_snackbar_error_action), View.OnClickListener {
+                    activity?.onBackPressed()
+                })
+                view.showSnackBar(getString(R.string.px_error_title), andesSnackbarAction = action)
+            }
+
             inputInfoLiveData.nonNullObserve(viewLifecycleOwner) {
                 cvvEditText.filters = arrayOf<InputFilter>(LengthFilter(it))
             }
@@ -131,37 +129,8 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         securityCodeViewModel.enqueueOnExploding(cvvEditText.text.toString(), callback)
     }
 
-    override fun resolvePaymentError(error: MercadoPagoError): Boolean {
-        payButtonFragment.enable()
-        when {
-            error.isNoConnectivityError -> resolveConnectionError()
-            !error.isPaymentProcessing -> {
-                securityCodeViewModel.onPaymentError()
-                val action = AndesSnackbarAction(
-                    getString(R.string.px_snackbar_error_action),
-                    View.OnClickListener { activity?.onBackPressed() }
-                )
-                view.showSnackBar(getString(R.string.px_error_title), andesSnackbarAction = action)
-            }
-        }
-        return true
-    }
-
-    private fun resolveConnectionError() {
-        securityCodeViewModel.onConnectionError()
-        if (retryCounter < MAXIMUM_RETRIES) {
-            retryCounter += 1
-            view.showSnackBar(
-                getString(R.string.px_connectivity_neutral_error),
-                AndesSnackbarType.NEUTRAL,
-                AndesSnackbarDuration.SHORT)
-        } else {
-            val action = AndesSnackbarAction(
-                getString(R.string.px_snackbar_error_action),
-                View.OnClickListener { activity?.onBackPressed() }
-            )
-            view.showSnackBar(getString(R.string.px_connectivity_error), andesSnackbarAction = action)
-        }
+    override fun onPaymentError(error: MercadoPagoError) {
+        securityCodeViewModel.onPaymentError()
     }
 
     override fun handleBack() = payButtonFragment.isExploding().also { securityCodeViewModel.onBack() }
@@ -171,8 +140,6 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         private const val EXTRA_PAYMENT_CONFIGURATION = "payment_configuration"
         private const val EXTRA_REASON = "reason"
         private const val EXTRA_PAYMENT_RECOVERY = "payment_recovery"
-        private const val RETRY_COUNTER = "retry_counter"
-        private const val MAXIMUM_RETRIES = 3
 
         @JvmStatic
         fun newInstance(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery) =

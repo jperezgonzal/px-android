@@ -10,15 +10,6 @@ class SecurityCodeFrictions {
         this.data.putAll(data.toMap())
     }
 
-    fun trackNoConnectionError() {
-        val frictionId = FrictionEventTracker.Id.NO_CONNECTION
-        FrictionEventTracker.with(
-            "${SecurityCodeTrack.ACTION_BASE_PATH}/${frictionId.name}",
-            frictionId,
-            FrictionEventTracker.Style.SNACKBAR,
-            data).track()
-    }
-
     fun trackPaymentApiError() {
         val frictionId = FrictionEventTracker.Id.PAYMENTS_API_ERROR
 
