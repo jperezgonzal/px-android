@@ -26,7 +26,6 @@ import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.Payment.StatusCodes.STATUS_APPROVED
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import com.mercadopago.android.px.model.internal.CustomTexts
-import com.mercadopago.android.px.model.internal.GenericPaymentDescriptor
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.model.internal.remedies.RemediesResponse
 import com.mercadopago.android.px.preferences.CheckoutPreference
@@ -194,7 +193,7 @@ internal class PayButtonViewModelTest: BasicRobolectricTest() {
 
         verify(handler).enqueueOnExploding(callback.capture())
         callback.value.success()
-        verify(uiStateObserver).onChanged(any(UIError.ConnectionError::class.java))
+        verify(uiStateObserver).onChanged(any(UIError.BusinessError::class.java))
         verify(handler).onPaymentError(error)
         verify(uiStateObserver).onChanged(any(UIProgress.ButtonLoadingCanceled::class.java))
     }

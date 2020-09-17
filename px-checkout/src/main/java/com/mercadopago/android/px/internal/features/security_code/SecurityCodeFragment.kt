@@ -14,9 +14,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.meli.android.carddrawer.model.CardDrawerView
+import com.mercadolibre.android.andesui.snackbar.action.AndesSnackbarAction
 import com.mercadopago.android.px.R
 import com.mercadopago.android.px.core.BackHandler
 import com.mercadopago.android.px.internal.di.viewModel
+import com.mercadopago.android.px.internal.extensions.showSnackBar
 import com.mercadopago.android.px.internal.features.pay_button.PayButton
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment
 import com.mercadopago.android.px.internal.util.ViewUtils
@@ -24,7 +26,6 @@ import com.mercadopago.android.px.internal.util.nonNullObserve
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
-
 
 internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler {
 
@@ -66,14 +67,18 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         arguments?.apply {
 
             check(
-                containsKey(EXTRA_PAYMENT_RECOVERY) || containsKey(EXTRA_PAYMENT_CONFIGURATION) && containsKey(EXTRA_REASON))
+                containsKey(EXTRA_PAYMENT_RECOVERY)
+                    || containsKey(EXTRA_PAYMENT_CONFIGURATION)
+                    && containsKey(EXTRA_REASON)) {
+                "PaymentRecovery or PaymentConfiguration and Reason are needed"
+            }
 
             securityCodeViewModel.init(
                 getParcelable(EXTRA_PAYMENT_CONFIGURATION)!!,
                 getParcelable(EXTRA_PAYMENT_RECOVERY),
                 getString(EXTRA_REASON)?.let { Reason.valueOf(it) })
 
-        } ?: error("")
+        } ?: error("Arguments not be null")
 
         payButtonFragment = childFragmentManager.findFragmentById(R.id.pay_button) as PayButtonFragment
         observeViewModel()
@@ -99,6 +104,14 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
                 }
             }
 
+            tokenizeErrorApiLiveData.nonNullObserve(viewLifecycleOwner) {
+                val action = AndesSnackbarAction(
+                    getString(R.string.px_snackbar_error_action), View.OnClickListener {
+                    activity?.onBackPressed()
+                })
+                view.showSnackBar(getString(R.string.px_error_title), andesSnackbarAction = action)
+            }
+
             inputInfoLiveData.nonNullObserve(viewLifecycleOwner) {
                 cvvEditText.filters = arrayOf<InputFilter>(LengthFilter(it))
             }
@@ -113,6 +126,8 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         securityCodeViewModel.enqueueOnExploding(cvvEditText.text.toString(), callback)
     }
 
+    override fun handleBack() = payButtonFragment.isExploding()
+
     companion object {
         const val TAG = "security_code"
         private const val EXTRA_PAYMENT_CONFIGURATION = "payment_configuration"
@@ -120,23 +135,21 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         private const val EXTRA_PAYMENT_RECOVERY = "payment_recovery"
 
         @JvmStatic
-        fun newInstance(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery) = SecurityCodeFragment().also {
-            it.arguments = Bundle().apply {
-                putParcelable(EXTRA_PAYMENT_CONFIGURATION, paymentConfiguration)
-                putParcelable(EXTRA_PAYMENT_RECOVERY, paymentRecovery)
+        fun newInstance(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery) =
+            SecurityCodeFragment().also {
+                it.arguments = Bundle().apply {
+                    putParcelable(EXTRA_PAYMENT_CONFIGURATION, paymentConfiguration)
+                    putParcelable(EXTRA_PAYMENT_RECOVERY, paymentRecovery)
+                }
             }
-        }
 
         @JvmStatic
-        fun newInstance(paymentConfiguration: PaymentConfiguration, reason: Reason) = SecurityCodeFragment().also {
-            it.arguments = Bundle().apply {
-                putParcelable(EXTRA_PAYMENT_CONFIGURATION, paymentConfiguration)
-                putString(EXTRA_REASON, reason.name)
+        fun newInstance(paymentConfiguration: PaymentConfiguration, reason: Reason) =
+            SecurityCodeFragment().also {
+                it.arguments = Bundle().apply {
+                    putParcelable(EXTRA_PAYMENT_CONFIGURATION, paymentConfiguration)
+                    putString(EXTRA_REASON, reason.name)
+                }
             }
-        }
-    }
-
-    override fun handleBack(): Boolean {
-        return payButtonFragment.isExploding()
     }
 }

@@ -49,6 +49,8 @@ internal class PayButtonViewModel(
 
     val buttonTextLiveData = MutableLiveData<ButtonConfig>()
     private var buttonConfig: ButtonConfig = payButtonViewModelMapper.map(customTextsRepository.customTexts)
+    private val connectivityError = MercadoPagoError(ApiUtil.getApiException(NoConnectivityException()), null)
+    private var retryCounter = 0
 
     init {
         buttonTextLiveData.value = buttonConfig
@@ -127,7 +129,7 @@ internal class PayButtonViewModel(
             }
 
             override fun failure() {
-                stateUILiveData.value = (ButtonLoadingCanceled)
+               stateUILiveData.value = ButtonLoadingCanceled
             }
         })
     }
@@ -168,8 +170,8 @@ internal class PayButtonViewModel(
         val recoverRequiredLiveData: LiveData<PaymentRecovery?> =
             transform(serviceLiveData.recoverInvalidEscLiveData) { it.takeIf { it.shouldAskForCvv() } }
         this.recoverRequiredLiveData.addSource(recoverRequiredLiveData) { value ->
-            value?.let {
-                paymentRecovery -> this.recoverRequiredLiveData.value = Pair(paymentConfiguration!!, paymentRecovery)
+            value?.let { paymentRecovery ->
+                this.recoverRequiredLiveData.value = Pair(paymentConfiguration!!, paymentRecovery)
             }
             stateUILiveData.value = ButtonLoadingCanceled
         }
@@ -217,16 +219,18 @@ internal class PayButtonViewModel(
     }
 
     private fun manageNoConnection() {
-        val exception = NoConnectivityException()
-        val apiException = ApiUtil.getApiException(exception)
-        val error = MercadoPagoError(apiException, null)
-        noRecoverableError(error)
+        trackNoRecoverableFriction(connectivityError)
+        stateUILiveData.value = UIError.ConnectionError(++retryCounter)
+    }
+
+    private fun trackNoRecoverableFriction(error: MercadoPagoError) {
+        FrictionEventTracker.with(OneTapViewTracker.PATH_REVIEW_ONE_TAP_VIEW,
+            FrictionEventTracker.Id.GENERIC, FrictionEventTracker.Style.CUSTOM_COMPONENT, error).track()
     }
 
     private fun noRecoverableError(error: MercadoPagoError) {
-        FrictionEventTracker.with(OneTapViewTracker.PATH_REVIEW_ONE_TAP_VIEW,
-            FrictionEventTracker.Id.GENERIC, FrictionEventTracker.Style.CUSTOM_COMPONENT, error).track()
-        stateUILiveData.value = UIError.ConnectionError(error)
+        trackNoRecoverableFriction(error)
+        stateUILiveData.value = UIError.BusinessError
     }
 
     override fun hasFinishPaymentAnimation() {
@@ -256,6 +260,7 @@ internal class PayButtonViewModel(
         bundle.putParcelable(BUNDLE_CONFIRM_DATA, confirmTrackerData)
         bundle.putParcelable(BUNDLE_PAYMENT_MODEL, paymentModel)
         bundle.putBoolean(BUNDLE_OBSERVING_SERVICE, observingService)
+        bundle.putInt(RETRY_COUNTER, retryCounter)
     }
 
     override fun recoverFromBundle(bundle: Bundle) {
@@ -263,6 +268,7 @@ internal class PayButtonViewModel(
         confirmTrackerData = bundle.getParcelable(BUNDLE_CONFIRM_DATA)
         paymentModel = bundle.getParcelable(BUNDLE_PAYMENT_MODEL)
         observingService = bundle.getBoolean(BUNDLE_OBSERVING_SERVICE)
+        retryCounter = bundle.getInt(RETRY_COUNTER,0)
         if (observingService) {
             observeService(paymentService.observableEvents)
         }
@@ -273,5 +279,7 @@ internal class PayButtonViewModel(
         const val BUNDLE_CONFIRM_DATA = "BUNDLE_CONFIRM_DATA"
         const val BUNDLE_PAYMENT_MODEL = "BUNDLE_PAYMENT_MODEL"
         const val BUNDLE_OBSERVING_SERVICE = "BUNDLE_OBSERVING_SERVICE"
+        private const val RETRY_COUNTER = "retry_counter"
+
     }
 }

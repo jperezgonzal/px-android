@@ -41,11 +41,14 @@ class SecurityCodeViewModel(
     private val inputInfoMutableLiveData = MutableLiveData<Int>()
     val inputInfoLiveData: LiveData<Int>
         get() = inputInfoMutableLiveData
+    private val tokenizeErrorApiMutableLiveData = MutableLiveData<Unit>()
+    val tokenizeErrorApiLiveData: LiveData<Unit>
+        get() = tokenizeErrorApiMutableLiveData
 
     private lateinit var paymentConfiguration: PaymentConfiguration
     private var paymentRecovery: PaymentRecovery? = null
     private var reason: Reason? = null
-    private var cardUserSelection: Card = userSelectionRepository.card ?: error("")
+    private var cardUserSelection: Card = userSelectionRepository.card ?: error("Card selected not be null")
     private var cvvInfo: CvvInfo? = cardUserSelection.paymentMethod?.displayInfo?.cvvInfo
 
     init {
@@ -55,9 +58,9 @@ class SecurityCodeViewModel(
             val initResponse = initRepository.loadInitResponse()
             val cardDisplayInfo = initResponse?.let { response ->
                 val expressMetadata = response.express.find { data -> data.isCard && data.card.id == cardUserSelection.id }
-                    ?: error("")
+                    ?: error("ExpressMetadata not be null")
                 expressMetadata.card?.displayInfo
-            } ?: error("")
+            } ?: error("DisplayInfo not be null")
 
             cvvCardUiMutableLiveData.postValue(cardConfigurationMapper.map(cardDisplayInfo))
         }
@@ -77,7 +80,7 @@ class SecurityCodeViewModel(
 
     fun enqueueOnExploding(cvv: String, callback: PayButton.OnEnqueueResolvedCallback) {
         CoroutineScope(Dispatchers.IO).launch {
-            val token = if (paymentRecovery != null) {
+            val response = if (paymentRecovery != null) {
                 CVVRecoveryWrapper(cardTokenRepository,
                     escManagerBehaviour,
                     paymentRecovery!!).recoverWithCVV(cvv)
@@ -91,10 +94,13 @@ class SecurityCodeViewModel(
             }
 
             withContext(Dispatchers.Main) {
-                token?.let {
+                response.resolve(success = { token ->
                     paymentSettingRepository.configure(token)
                     callback.success()
-                } ?: callback.failure()
+                }, error = {
+                    tokenizeErrorApiMutableLiveData.value = Unit
+                    callback.failure()
+                })
             }
         }
     }

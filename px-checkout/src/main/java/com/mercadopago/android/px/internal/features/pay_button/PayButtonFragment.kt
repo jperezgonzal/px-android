@@ -1,6 +1,5 @@
 package com.mercadopago.android.px.internal.features.pay_button
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -12,7 +11,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import com.mercadolibre.android.andesui.snackbar.AndesSnackbar
+import com.mercadolibre.android.andesui.snackbar.action.AndesSnackbarAction
 import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration
 import com.mercadolibre.android.andesui.snackbar.type.AndesSnackbarType
 import com.mercadolibre.android.ui.widgets.MeliButton
@@ -20,8 +19,9 @@ import com.mercadopago.android.px.R
 import com.mercadopago.android.px.addons.BehaviourProvider
 import com.mercadopago.android.px.addons.internal.SecurityValidationHandler
 import com.mercadopago.android.px.addons.model.SecurityValidationData
-import com.mercadopago.android.px.internal.extensions.orIfEmpty
 import com.mercadopago.android.px.internal.di.viewModel
+import com.mercadopago.android.px.internal.extensions.runIfNull
+import com.mercadopago.android.px.internal.extensions.showSnackBar
 import com.mercadopago.android.px.internal.features.Constants
 import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultActivity
 import com.mercadopago.android.px.internal.features.dummy_result.DummyResultActivity
@@ -49,7 +49,6 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         when {
             targetFragment is PayButton.Handler -> viewModel.attach(targetFragment as PayButton.Handler)
             parentFragment is PayButton.Handler -> viewModel.attach(parentFragment as PayButton.Handler)
@@ -95,7 +94,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             is UIProgress.ButtonLoadingFinished -> finishLoading(stateUI.explodeDecorator)
             is UIProgress.ButtonLoadingCanceled -> cancelLoading()
             is UIResult.VisualProcessorResult -> PaymentProcessorActivity.start(this, REQ_CODE_PAYMENT_PROCESSOR)
-            is UIError.ConnectionError -> showSnackBar(stateUI.message)
+            is UIError -> resolveError(stateUI)
             is UIResult.PaymentResult -> PaymentResultActivity.start(this, REQ_CODE_CONGRATS, stateUI.model)
             is UIResult.BusinessPaymentResult ->
                 BusinessPaymentResultActivity.start(this, REQ_CODE_CONGRATS, stateUI.model)
@@ -123,18 +122,36 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         }
     }
 
-    @SuppressLint("Range")
-    private fun showSnackBar(error: String) {
-        view?.let {
-            it.context?.let { context ->
-                AndesSnackbar(context, it, AndesSnackbarType.ERROR, error.orIfEmpty(context.getString(R.string.px_error_title)), AndesSnackbarDuration.LONG).show()
-            }
-        }
-    }
-
     private fun startBiometricsValidation(validationData: SecurityValidationData) {
         disable()
         BehaviourProvider.getSecurityBehaviour().startValidation(this, validationData, REQ_CODE_BIOMETRICS)
+    }
+
+    private fun resolveConnectionError(uiError: UIError.ConnectionError) {
+        var action: AndesSnackbarAction? = null
+        var type = AndesSnackbarType.NEUTRAL
+        var duration = AndesSnackbarDuration.SHORT
+
+        uiError.actionMessage?.also {
+            action = AndesSnackbarAction(getString(it), View.OnClickListener { activity?.onBackPressed() })
+            type = AndesSnackbarType.ERROR
+            duration = AndesSnackbarDuration.LONG
+        }
+
+        view.showSnackBar(getString(uiError.message), type, duration, action)
+    }
+
+    private fun resolveError(uiError: UIError) {
+        when (uiError) {
+            is UIError.ConnectionError -> resolveConnectionError(uiError)
+            else -> {
+                val action = AndesSnackbarAction(
+                    getString(R.string.px_snackbar_error_action), View.OnClickListener {
+                    activity?.onBackPressed()
+                })
+                view.showSnackBar(getString(R.string.px_error_title), andesSnackbarAction = action)
+            }
+        }
     }
 
     override fun onAnimationFinished() {
@@ -211,30 +228,35 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
                 .commitNowAllowingStateLoss()
             restoreStatusBar()
         }
+        enable()
     }
 
     private fun restoreStatusBar() {
-        activity?.let {
-            ViewUtils.setStatusBarColor(ContextCompat.getColor(it, R.color.px_colorPrimaryDark), it.window)
-        }
+        activity?.let { ViewUtils.setStatusBarColor(ContextCompat.getColor(it, R.color.px_colorPrimaryDark), it.window) }
     }
 
     private fun hideConfirmButton() {
-        button.clearAnimation()
-        button.visibility = INVISIBLE
+        with(button) {
+            clearAnimation()
+            visibility = INVISIBLE
+        }
     }
 
     private fun showConfirmButton() {
-        button.clearAnimation()
-        button.visibility = VISIBLE
+        with(button) {
+            clearAnimation()
+            visibility = VISIBLE
+        }
     }
 
     private fun showSecurityCodeScreen(securityCodeFragment: SecurityCodeFragment) {
         activity?.supportFragmentManager?.apply {
-            beginTransaction()
-                .replace(R.id.one_tap_fragment, securityCodeFragment, SecurityCodeFragment.TAG)
-                .addToBackStack(SecurityCodeFragment.TAG)
-                .commitAllowingStateLoss()
+            findFragmentByTag(SecurityCodeFragment.TAG).runIfNull {
+                beginTransaction()
+                    .replace(R.id.one_tap_fragment, securityCodeFragment, SecurityCodeFragment.TAG)
+                    .addToBackStack(SecurityCodeFragment.TAG)
+                    .commitAllowingStateLoss()
+            }
         }
     }
 

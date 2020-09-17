@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 
-internal class ViewModelModule() {
+internal class ViewModelModule {
     private val factory = ViewModelFactory()
 
     fun <T : ViewModel?> get(fragment: Fragment, modelClass: Class<T>): T {

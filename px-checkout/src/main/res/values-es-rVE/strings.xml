@@ -190,4 +190,7 @@
         <item quantity="other">Se acreditará en {0} días hábiles</item>
     </plurals>
     <string name="px_security_code_screen_title">Ingresa el código de seguridad</string>
+    <string name="px_connectivity_neutral_error">Hubo un error de conexión. Por favor, intenta pagar nuevamente.</string>
+    <string name="px_connectivity_error">No hay conexión. Intenta pagar más tarde.</string>
+    <string name="px_snackbar_error_action">Volver</string>
 </resources>

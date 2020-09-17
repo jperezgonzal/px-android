@@ -9,10 +9,7 @@ import com.mercadopago.android.px.internal.repository.*
 import com.mercadopago.android.px.internal.util.CVVRecoveryWrapper
 import com.mercadopago.android.px.internal.util.TokenCreationWrapper
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel
-import com.mercadopago.android.px.model.Card
-import com.mercadopago.android.px.model.PayerCost
-import com.mercadopago.android.px.model.PaymentData
-import com.mercadopago.android.px.model.PaymentRecovery
+import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.model.internal.remedies.RemedyPaymentMethod
 import com.mercadopago.android.px.tracking.internal.events.RemedyEvent
@@ -44,7 +41,7 @@ internal class RemediesViewModel(
         val methodIds = getMethodIds()
         val customOptionId = methodIds.customOptionId
         CoroutineScope(Dispatchers.IO).launch {
-            initRepository.loadInitResponse()?.let {initResponse ->
+            initRepository.loadInitResponse()?.let { initResponse ->
                 val methodData = initResponse.express.find { it.customOptionId == customOptionId }
                 val isCard = methodData?.isCard == true
                 if (isCard) {
@@ -117,17 +114,14 @@ internal class RemediesViewModel(
         RemedyEvent(getRemedyTrackData(RemedyType.PAYMENT_METHOD_SUGGESTION)).track()
         remediesModel.retryPayment?.cvvModel?.let {
             CoroutineScope(Dispatchers.IO).launch {
-                val tokenCreationWrapper = TokenCreationWrapper.Builder(cardTokenRepository, escManagerBehaviour)
-                    .with(card!!).build()
-                try {
-                    tokenCreationWrapper.createToken(cvv).apply { paymentSettingRepository.configure(this) }
-                    withContext(Dispatchers.Main) {
+                val response = TokenCreationWrapper.Builder(cardTokenRepository, escManagerBehaviour)
+                    .with(card!!).build().createToken(cvv)
+
+                withContext(Dispatchers.Main) {
+                    response.resolve(success = { token ->
+                        paymentSettingRepository.configure(token)
                         callback.success()
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        callback.failure()
-                    }
+                    }, error = { callback.failure() })
                 }
             }
         } ?: callback.success()
@@ -135,15 +129,17 @@ internal class RemediesViewModel(
 
     private fun startCvvRecovery(callback: PayButton.OnEnqueueResolvedCallback) {
         CoroutineScope(Dispatchers.IO).launch {
-            CVVRecoveryWrapper(cardTokenRepository, escManagerBehaviour, paymentRecovery)
-                .recoverWithCVV(cvv)?.let {
-                    paymentSettingRepository.configure(it)
-                    withContext(Dispatchers.Main) {
-                        RemedyEvent(getRemedyTrackData(RemedyType.CVV_REQUEST)).track()
-                        callback.success()
-                    }
-                } ?: withContext(Dispatchers.Main) {
-                callback.failure()
+            val response = CVVRecoveryWrapper(
+                cardTokenRepository,
+                escManagerBehaviour,
+                paymentRecovery).recoverWithCVV(cvv)
+
+            withContext(Dispatchers.Main) {
+                response.resolve(success = { token ->
+                    paymentSettingRepository.configure(token)
+                    RemedyEvent(getRemedyTrackData(RemedyType.CVV_REQUEST)).track()
+                    callback.success()
+                }, error = { callback.failure() })
             }
         }
     }
