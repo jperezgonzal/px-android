@@ -1,6 +1,6 @@
 package com.mercadopago.android.px.internal.features.security_code.use_case
 
-import com.mercadopago.android.px.internal.base.response.Response
+import com.mercadopago.android.px.internal.callbacks.Response
 import com.mercadopago.android.px.internal.base.use_case.UseCase
 import com.mercadopago.android.px.internal.extensions.notNull
 import com.mercadopago.android.px.internal.repository.InitRepository

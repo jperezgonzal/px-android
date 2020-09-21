@@ -6,7 +6,7 @@ import com.mercadopago.android.px.internal.repository.DisabledPaymentMethodRepos
 import com.mercadopago.android.px.internal.repository.ExperimentsRepository
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
 import com.mercadopago.android.px.internal.services.CheckoutService
-import com.mercadopago.android.px.internal.base.response.Response
+import com.mercadopago.android.px.internal.callbacks.Response
 import com.mercadopago.android.px.internal.callbacks.awaitCallback
 import com.mercadopago.android.px.internal.tracking.TrackingRepository
 import com.mercadopago.android.px.model.internal.InitResponse

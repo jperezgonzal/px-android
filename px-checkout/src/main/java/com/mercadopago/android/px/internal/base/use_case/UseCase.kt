@@ -1,6 +1,6 @@
 package com.mercadopago.android.px.internal.base.use_case
 
-import com.mercadopago.android.px.internal.base.response.Response
+import com.mercadopago.android.px.internal.callbacks.Response
 import com.mercadopago.android.px.internal.extensions.orIfEmpty
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import kotlinx.coroutines.CoroutineScope

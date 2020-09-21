@@ -1,4 +1,4 @@
-package com.mercadopago.android.px.internal.base.response
+package com.mercadopago.android.px.internal.callbacks
 
 sealed class Response<out T, out F> {
     data class Success<out T>(val result: T): Response<T, Nothing>()
