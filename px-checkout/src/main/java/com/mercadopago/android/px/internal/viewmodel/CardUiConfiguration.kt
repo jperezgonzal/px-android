@@ -14,6 +14,20 @@ internal class CardUiConfiguration(
     private val disableConfiguration: DisableConfiguration? = null,
     val disabled: Boolean = false) : CardUI {
 
+    val name: String
+
+    val date: String
+
+    val number: String
+
+    init {
+        with(businessCardDisplayInfo) {
+            name = cardholderName
+            date = expiration
+            number = cardPatternMask
+        }
+    }
+
     override fun getBankImageRes(): Int = 0
 
     override fun setBankImage(bankImage: ImageView) {
@@ -55,12 +69,6 @@ internal class CardUiConfiguration(
     override fun getCardFontColor(): Int = if (disabled && disableConfiguration != null)
         disableConfiguration.fontColor
     else Color.parseColor(businessCardDisplayInfo.fontColor)
-
-    fun getName(): String? = businessCardDisplayInfo.cardholderName
-
-    fun getDate(): String? = businessCardDisplayInfo.expiration
-
-    fun getNumber(): String? = businessCardDisplayInfo.cardPatternMask
 
     private fun toGrayScaleIfDisabled(imageView: ImageView) {
         if (disabled) {

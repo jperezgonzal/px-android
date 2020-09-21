@@ -91,9 +91,9 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         with(securityCodeViewModel) {
             cvvCardUiLiveData.nonNullObserve(viewLifecycleOwner) {
                 with(cardDrawer) {
-                    card.name = it.getName()
-                    card.expiration = it.getDate()
-                    card.number = it.getNumber()
+                    card.name = it.name
+                    card.expiration = it.date
+                    card.number = it.number
                     show(it)
                 }
             }

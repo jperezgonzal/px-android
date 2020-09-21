@@ -60,7 +60,6 @@ open class FrictionEventTracker protected constructor(private val path: String, 
         private const val ATTR_ATTRIBUTABLE = "attributable_to"
         private const val VALUE_ATTRIBUTABLE = "mercadopago"
         private const val ATTR_EXTRA_INFO = "extra_info"
-        private const val MESSAGE_EXTRA_INFO = "message"
 
         @JvmStatic
         fun with(fId: Id, track: TrackWrapper, style: Style, mercadoPagoError: MercadoPagoError): FrictionEventTracker {
