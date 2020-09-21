@@ -12,12 +12,12 @@ typealias CallBack<T> = (T) -> Unit
 
 abstract class UseCase<in P, out R> {
 
-    abstract suspend fun buildUseCase(param: P): Response<R, MercadoPagoError>
+    protected abstract suspend fun doExecute(param: P): Response<R, MercadoPagoError>
 
     fun execute(param: P, success: CallBack<R> = {}, failure: CallBack<MercadoPagoError> = {}) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                buildUseCase(param).also { response ->
+                doExecute(param).also { response ->
                     withContext(Dispatchers.Main) { response.resolve(success, failure) }
                 }
             } catch (e: Exception) {

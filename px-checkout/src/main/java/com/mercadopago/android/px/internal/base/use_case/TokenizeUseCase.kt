@@ -16,7 +16,7 @@ class TokenizeUseCase(
     private val userSelectionRepository: UserSelectionRepository
 ) : UseCase<TokenizeParams, Token>() {
 
-    override suspend fun buildUseCase(param: TokenizeParams) = param.paymentRecovery.runIfNotNull {
+    override suspend fun doExecute(param: TokenizeParams) = param.paymentRecovery.runIfNotNull {
         CVVRecoveryWrapper(cardTokenRepository, escManagerBehaviour, it).recoverWithCVV(param.securityCode)
     } ?: notNull(userSelectionRepository.card).let {
         TokenCreationWrapper

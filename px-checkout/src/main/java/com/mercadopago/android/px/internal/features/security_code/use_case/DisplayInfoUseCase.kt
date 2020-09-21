@@ -13,7 +13,7 @@ class DisplayInfoUseCase(
     private val userSelectionRepository: UserSelectionRepository
 ) : UseCase<Unit, Triple<CardDisplayInfo?, CvvInfo?, Int>>() {
 
-    override suspend fun buildUseCase(param: Unit) = notNull(userSelectionRepository.card).let { card ->
+    override suspend fun doExecute(param: Unit) = notNull(userSelectionRepository.card).let { card ->
 
         val securityCodeLength = card.getSecurityCodeLength() ?: 0
         card.paymentMethod?.displayInfo?.cvvInfo?.let {
