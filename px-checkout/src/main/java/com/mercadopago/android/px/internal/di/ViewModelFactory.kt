@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.mercadopago.android.px.internal.core.ConnectionHelper
 import com.mercadopago.android.px.internal.features.express.offline_methods.OfflineMethodsViewModel
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonViewModel
-import com.mercadopago.android.px.internal.features.security_code.CardConfigurationMapper
 import com.mercadopago.android.px.internal.features.security_code.SecurityCodeViewModel
-import com.mercadopago.android.px.internal.features.security_code.VirtualCardInfoMapper
+import com.mercadopago.android.px.internal.features.security_code.use_case.DisplayInfoUseCase
+import com.mercadopago.android.px.internal.base.use_case.TokenizeUseCase
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 
 internal class ViewModelFactory : ViewModelProvider.Factory {
@@ -32,14 +32,15 @@ internal class ViewModelFactory : ViewModelProvider.Factory {
                     session.discountRepository)
             }
             modelClass.isAssignableFrom(SecurityCodeViewModel::class.java) -> {
-                SecurityCodeViewModel(
+                val tokenizeUseCase = TokenizeUseCase(
                     session.cardTokenRepository,
                     session.mercadoPagoESC,
+                    configurationModule.userSelectionRepository)
+
+                SecurityCodeViewModel(
                     configurationModule.paymentSettings,
-                    session.initRepository,
-                    configurationModule.userSelectionRepository,
-                    CardConfigurationMapper(),
-                    VirtualCardInfoMapper())
+                    tokenizeUseCase,
+                    DisplayInfoUseCase(session.initRepository, configurationModule.userSelectionRepository))
             }
             else -> {
                 throw IllegalArgumentException("Unknown ViewModel class")

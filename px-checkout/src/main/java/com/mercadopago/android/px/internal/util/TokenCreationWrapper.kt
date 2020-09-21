@@ -5,12 +5,11 @@ import com.mercadopago.android.px.addons.model.EscDeleteReason
 import com.mercadopago.android.px.internal.callbacks.awaitTaggedCallback
 import com.mercadopago.android.px.internal.extensions.isNotNullNorEmpty
 import com.mercadopago.android.px.internal.repository.CardTokenRepository
-import com.mercadopago.android.px.internal.services.Response
+import com.mercadopago.android.px.internal.callbacks.Response
 import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.exceptions.CardTokenException
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import com.mercadopago.android.px.tracking.internal.model.Reason
-import kotlin.coroutines.resume
 
 internal class TokenCreationWrapper private constructor(builder: Builder) {
 
