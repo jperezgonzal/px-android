@@ -1,4 +1,4 @@
-package com.mercadopago.android.px.internal.base.response
+package com.mercadopago.android.px.internal.callbacks
 
 import com.mercadopago.android.px.internal.extensions.orIfEmpty
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError

@@ -5,24 +5,26 @@ import androidx.lifecycle.MutableLiveData
 import com.mercadopago.android.px.internal.base.BaseViewModel
 import com.mercadopago.android.px.internal.features.pay_button.PayButton
 import com.mercadopago.android.px.internal.features.security_code.model.VirtualCardInfo
-import com.mercadopago.android.px.internal.features.security_code.use_case.DisplayDataUseCase
+import com.mercadopago.android.px.internal.features.security_code.domain.use_case.DisplayDataUseCase
 import com.mercadopago.android.px.internal.base.use_case.TokenizeParams
 import com.mercadopago.android.px.internal.base.use_case.TokenizeUseCase
+import com.mercadopago.android.px.internal.features.security_code.domain.use_case.SecurityTrackModelUseCase
 import com.mercadopago.android.px.internal.features.security_code.tracking.SecurityCodeTracker
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
-import com.mercadopago.android.px.internal.viewmodel.CardDrawerConfiguration
+import com.mercadopago.android.px.internal.viewmodel.CardUiConfiguration
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
 
-class SecurityCodeViewModel(
+internal class SecurityCodeViewModel(
     private val paymentSettingRepository: PaymentSettingRepository,
     private val tokenizeUseCase: TokenizeUseCase,
     private val securityCodeTracker: SecurityCodeTracker,
-    private val displayDataUseCase: DisplayDataUseCase) : BaseViewModel() {
+    private val displayDataUseCase: DisplayDataUseCase,
+    private val trackModelUseCase: SecurityTrackModelUseCase) : BaseViewModel() {
 
-    private val cvvCardUiMutableLiveData = MutableLiveData<CardDrawerConfiguration>()
-    val cvvCardUiLiveData: LiveData<CardDrawerConfiguration>
+    private val cvvCardUiMutableLiveData = MutableLiveData<CardUiConfiguration>()
+    val cvvCardUiLiveData: LiveData<CardUiConfiguration>
         get() = cvvCardUiMutableLiveData
     private val virtualCardInfoMutableLiveData = MutableLiveData<VirtualCardInfo>()
     val virtualCardInfoLiveData: LiveData<VirtualCardInfo>
@@ -43,12 +45,15 @@ class SecurityCodeViewModel(
         this.paymentRecovery = paymentRecovery
         this.reason = reason
 
-        displayDataUseCase.execute(Unit, success = { displayData ->
-            displayData.cardDisplayInfo?.let { cvvCardUiMutableLiveData.postValue(CardDrawerConfiguration(it, null)) }
-            displayData.cvvInfo?.let { virtualCardInfoMutableLiveData.value = VirtualCardInfo(it.title, it.message) }
-            inputInfoMutableLiveData.value = displayData.securityCodeLength
-            securityCodeTracker.setTrackData(displayData.trackingModel, reason)
+        trackModelUseCase.execute(Unit, success = {
+            securityCodeTracker.setTrackData(it, reason)
             securityCodeTracker.trackSecurityCode()
+        })
+
+        displayDataUseCase.execute(Unit, success = { displayData ->
+            displayData.cardDisplayInfo?.let { cvvCardUiMutableLiveData.postValue(CardUiConfiguration(it, null)) }
+            displayData.virtualCardInfo?.let { virtualCardInfoMutableLiveData.value = VirtualCardInfo(it.title, it.message) }
+            inputInfoMutableLiveData.value = displayData.securityCodeLength
         })
     }
 

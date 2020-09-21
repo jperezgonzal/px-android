@@ -6,8 +6,10 @@ import com.mercadopago.android.px.internal.core.ConnectionHelper
 import com.mercadopago.android.px.internal.features.express.offline_methods.OfflineMethodsViewModel
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonViewModel
 import com.mercadopago.android.px.internal.features.security_code.SecurityCodeViewModel
-import com.mercadopago.android.px.internal.features.security_code.use_case.DisplayDataUseCase
+import com.mercadopago.android.px.internal.features.security_code.domain.use_case.DisplayDataUseCase
 import com.mercadopago.android.px.internal.base.use_case.TokenizeUseCase
+import com.mercadopago.android.px.internal.features.security_code.domain.use_case.SecurityTrackModelUseCase
+import com.mercadopago.android.px.internal.features.security_code.mapper.BusinessSecurityCodeDisplayDataMapper
 import com.mercadopago.android.px.internal.features.security_code.tracking.*
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 
@@ -40,11 +42,17 @@ internal class ViewModelFactory : ViewModelProvider.Factory {
                     session.mercadoPagoESC,
                     userSelectionRepository)
 
+                val displayDataUseCase = DisplayDataUseCase(
+                    session.initRepository,
+                    userSelectionRepository,
+                    BusinessSecurityCodeDisplayDataMapper())
+
                 SecurityCodeViewModel(
                     configurationModule.paymentSettings,
                     tokenizeUseCase,
                     SecurityCodeTracker(SecurityCodeViewTrack(), SecurityCodeEventTrack(), SecurityCodeFrictions()),
-                    DisplayDataUseCase(session.initRepository, userSelectionRepository))
+                    displayDataUseCase,
+                    SecurityTrackModelUseCase(userSelectionRepository))
             }
             else -> {
                 throw IllegalArgumentException("Unknown ViewModel class")

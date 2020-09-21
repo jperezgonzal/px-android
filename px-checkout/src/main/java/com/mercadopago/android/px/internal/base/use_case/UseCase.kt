@@ -1,6 +1,6 @@
 package com.mercadopago.android.px.internal.base.use_case
 
-import com.mercadopago.android.px.internal.base.response.Response
+import com.mercadopago.android.px.internal.callbacks.Response
 import com.mercadopago.android.px.internal.extensions.orIfEmpty
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import kotlinx.coroutines.CoroutineScope
@@ -12,18 +12,17 @@ typealias CallBack<T> = (T) -> Unit
 
 abstract class UseCase<in P, out R> {
 
-    abstract suspend fun buildUseCase(param: P): Response<R, MercadoPagoError>
+    protected abstract suspend fun doExecute(param: P): Response<R, MercadoPagoError>
 
     fun execute(param: P, success: CallBack<R> = {}, failure: CallBack<MercadoPagoError> = {}) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                buildUseCase(param).also { response ->
+                doExecute(param).also { response ->
                     withContext(Dispatchers.Main) { response.resolve(success, failure) }
                 }
             } catch (e: Exception) {
-                failure(MercadoPagoError(
-                    e.localizedMessage.orIfEmpty("Error when build ${this@UseCase.javaClass}"),
-                    false))
+                val errorMessage = e.localizedMessage.orIfEmpty("Error when build ${this@UseCase.javaClass}")
+                withContext(Dispatchers.Main) { failure(MercadoPagoError(errorMessage, false)) }
             }
         }
     }
