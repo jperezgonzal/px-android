@@ -30,14 +30,13 @@ import com.mercadopago.android.px.model.*
 import com.mercadopago.android.px.model.Currency
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
-import com.mercadopago.android.px.tracking.internal.TrackWrapper
 import com.mercadopago.android.px.tracking.internal.events.BiometricsFrictionTracker
 import com.mercadopago.android.px.tracking.internal.events.ConfirmEvent
 import com.mercadopago.android.px.tracking.internal.events.FrictionEventTracker
+import com.mercadopago.android.px.tracking.internal.events.NoConnectionFrictionTracker
 import com.mercadopago.android.px.tracking.internal.model.ConfirmData
 import com.mercadopago.android.px.tracking.internal.model.Reason
 import com.mercadopago.android.px.tracking.internal.views.OneTapViewTracker
-import java.util.*
 import com.mercadopago.android.px.internal.viewmodel.PayButtonViewModel as ButtonConfig
 
 internal class PayButtonViewModel(
@@ -229,11 +228,7 @@ internal class PayButtonViewModel(
     }
 
     private fun trackNoConnectionFriction() {
-        val frictionId = FrictionEventTracker.Id.NO_CONNECTION
-        FrictionEventTracker.with(
-            "${TrackWrapper.BASE_PATH}/${frictionId.name.toLowerCase(Locale.getDefault())}",
-            frictionId,
-            FrictionEventTracker.Style.SNACKBAR).track()
+        NoConnectionFrictionTracker.track()
     }
 
     private fun noRecoverableError(error: MercadoPagoError) {

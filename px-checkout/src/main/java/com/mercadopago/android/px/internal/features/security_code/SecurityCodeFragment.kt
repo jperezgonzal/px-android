@@ -133,7 +133,11 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         securityCodeViewModel.onPaymentError()
     }
 
-    override fun handleBack() = payButtonFragment.isExploding().also { securityCodeViewModel.onBack() }
+    override fun handleBack() = payButtonFragment.isExploding().also { isExploding ->
+        if (!isExploding) {
+            securityCodeViewModel.onBack()
+        }
+    }
 
     companion object {
         const val TAG = "security_code"
