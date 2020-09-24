@@ -180,7 +180,7 @@ public final class ViewUtils {
         view.requestFocus();
         final InputMethodManager imm =
             (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        imm.showSoftInput(view.findFocus(), InputMethodManager.SHOW_IMPLICIT);
     }
 
     public static void showProgressLayout(final Activity activity) {

@@ -16,4 +16,4 @@ interface SingleLiveData<T> {
     fun setPending() {
         pendingAtomicBoolean.set(true)
     }
-} 
+}

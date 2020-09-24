@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,7 @@ import com.mercadopago.android.px.internal.features.generic_modal.GenericDialogA
 import com.mercadopago.android.px.internal.features.generic_modal.GenericDialogItem;
 import com.mercadopago.android.px.internal.features.pay_button.PayButton;
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment;
+import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment;
 import com.mercadopago.android.px.internal.util.CardFormWithFragmentWrapper;
 import com.mercadopago.android.px.internal.util.Logger;
 import com.mercadopago.android.px.internal.util.VibrationUtils;
@@ -75,8 +77,6 @@ import static android.app.Activity.RESULT_OK;
 import static android.view.View.GONE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
-import static com.mercadopago.android.px.internal.features.express.slider.PaymentMethodFragmentAdapter.RenderMode.HIGH_RES;
-import static com.mercadopago.android.px.internal.features.express.slider.PaymentMethodFragmentAdapter.RenderMode.LOW_RES;
 
 public class ExpressPaymentFragment extends Fragment implements ExpressPayment.View, ViewPager.OnPageChangeListener,
     InstallmentsAdapter.ItemListener, SplitPaymentHeaderAdapter.SplitListener,
@@ -110,7 +110,7 @@ public class ExpressPaymentFragment extends Fragment implements ExpressPayment.V
     private PaymentMethodHeaderView paymentMethodHeaderView;
     private LabeledSwitch splitPaymentView;
     private PaymentMethodFragmentAdapter paymentMethodFragmentAdapter;
-    private PaymentMethodFragmentAdapter.RenderMode renderMode;
+    private RenderMode renderMode;
     private View loading;
 
     private HubAdapter hubAdapter;
@@ -137,6 +137,12 @@ public class ExpressPaymentFragment extends Fragment implements ExpressPayment.V
         presenter.onPostPaymentAction(postPaymentAction);
     }
 
+    @NonNull
+    @Override
+    public PayButton.CvvRequestedModel onCvvRequested() {
+        return new PayButton.CvvRequestedModel(R.id.one_tap_fragment, renderMode);
+    }
+
     @Override
     public boolean handleBack() {
         final boolean isExploding = payButtonFragment.isExploding();
@@ -154,44 +160,89 @@ public class ExpressPaymentFragment extends Fragment implements ExpressPayment.V
     @Override
     public Animation onCreateAnimation(final int transit, final boolean enter, final int nextAnim) {
         final FragmentManager fragmentManager = getFragmentManager();
-        if (fragmentManager != null && fragmentManager.findFragmentByTag(CardFormWithFragment.TAG) != null) {
-            final int duration = getResources().getInteger(R.integer.cf_anim_duration);
-            final int offset = getResources().getInteger(R.integer.px_card_form_animation_offset);
-            if (enter) {
-                final Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.px_summary_slide_up_in);
-                slideUp.setStartOffset(offset);
-                paymentMethodPager
-                    .startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.px_summary_slide_up_in));
-
-                final Animation fadeIn = AnimationUtils.loadAnimation(getContext(), R.anim.px_fade_in);
-                fadeIn.setDuration(duration);
-                fadeIn.setStartOffset(offset);
-
-                paymentMethodHeaderView.startAnimation(fadeIn);
-                splitPaymentView.startAnimation(fadeIn);
-                indicator.startAnimation(fadeIn);
-                payButtonContainer.startAnimation(slideUp);
-
-                summaryView.animateEnter(duration);
-            } else {
-                final Animation slideDown =
-                    AnimationUtils.loadAnimation(getContext(), R.anim.px_summary_slide_down_out);
-                paymentMethodPager.startAnimation(slideDown);
-
-                final Animation fadeOut = AnimationUtils.loadAnimation(getContext(), R.anim.px_fade_out);
-                fadeOut.setDuration(duration);
-
-                paymentMethodHeaderView.startAnimation(fadeOut);
-                indicator.startAnimation(fadeOut);
-                payButtonContainer.startAnimation(slideDown);
-                if (splitPaymentView.getVisibility() == VISIBLE) {
-                    splitPaymentView.startAnimation(fadeOut);
-                }
-
-                summaryView.animateExit(offset);
+        if (fragmentManager != null) {
+            if (fragmentManager.findFragmentByTag(CardFormWithFragment.TAG) != null) {
+                transitionCardForm(enter);
+            } else if (fragmentManager.findFragmentByTag(SecurityCodeFragment.TAG) != null) {
+                transitionSecurityCode(enter);
             }
         }
         return super.onCreateAnimation(transit, enter, nextAnim);
+    }
+
+    private void transitionCardForm(final boolean enter) {
+        final int duration = getResources().getInteger(R.integer.cf_anim_duration);
+        final int offset = getResources().getInteger(R.integer.px_card_form_animation_offset);
+        if (enter) {
+            final Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.px_summary_slide_up_in);
+            slideUp.setStartOffset(offset);
+            paymentMethodPager
+                .startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.px_summary_slide_up_in));
+
+            final Animation fadeIn = AnimationUtils.loadAnimation(getContext(), R.anim.px_fade_in);
+            fadeIn.setDuration(duration);
+            fadeIn.setStartOffset(offset);
+
+            paymentMethodHeaderView.startAnimation(fadeIn);
+            splitPaymentView.startAnimation(fadeIn);
+            indicator.startAnimation(fadeIn);
+            payButtonContainer.startAnimation(slideUp);
+
+            summaryView.animateEnter(duration);
+        } else {
+            final Animation slideDown =
+                AnimationUtils.loadAnimation(getContext(), R.anim.px_summary_slide_down_out);
+            paymentMethodPager.startAnimation(slideDown);
+
+            final Animation fadeOut = AnimationUtils.loadAnimation(getContext(), R.anim.px_fade_out);
+            fadeOut.setDuration(duration);
+
+            paymentMethodHeaderView.startAnimation(fadeOut);
+            indicator.startAnimation(fadeOut);
+            payButtonContainer.startAnimation(slideDown);
+            if (splitPaymentView.getVisibility() == VISIBLE) {
+                splitPaymentView.startAnimation(fadeOut);
+            }
+
+            summaryView.animateExit(offset);
+        }
+    }
+
+    private void transitionSecurityCode(final boolean enter) {
+        final int duration = getResources().getInteger(R.integer.cf_anim_duration);
+        final int offset = getResources().getInteger(R.integer.px_card_form_animation_offset);
+        if (enter) {
+            final Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.px_summary_slide_up_in);
+            slideUp.setStartOffset(offset);
+            paymentMethodPager.setVisibility(INVISIBLE);
+            new Handler().postDelayed(() -> paymentMethodPager.setVisibility(VISIBLE), 550);
+
+            final Animation fadeIn = AnimationUtils.loadAnimation(getContext(), R.anim.px_fade_in);
+            fadeIn.setDuration(duration);
+            fadeIn.setStartOffset(offset);
+
+            paymentMethodHeaderView.startAnimation(fadeIn);
+            splitPaymentView.startAnimation(fadeIn);
+            indicator.startAnimation(fadeIn);
+            payButtonContainer.setVisibility(INVISIBLE);
+            new Handler().postDelayed(() -> payButtonContainer.setVisibility(VISIBLE), 550);
+
+            summaryView.animateEnter(duration);
+        } else {
+            new Handler().postDelayed(() -> paymentMethodPager.setVisibility(INVISIBLE), 100);
+
+            final Animation fadeOut = AnimationUtils.loadAnimation(getContext(), R.anim.px_fade_out);
+            fadeOut.setDuration(duration);
+
+            paymentMethodHeaderView.startAnimation(fadeOut);
+            indicator.startAnimation(fadeOut);
+            payButtonContainer.startAnimation(fadeOut);
+            if (splitPaymentView.getVisibility() == VISIBLE) {
+                splitPaymentView.startAnimation(fadeOut);
+            }
+
+            summaryView.animateExit(offset);
+        }
     }
 
     @Nullable
@@ -209,8 +260,7 @@ public class ExpressPaymentFragment extends Fragment implements ExpressPayment.V
 
         presenter = createPresenter();
         if (savedInstanceState != null) {
-            renderMode =
-                (PaymentMethodFragmentAdapter.RenderMode) savedInstanceState.getSerializable(EXTRA_RENDER_MODE);
+            renderMode = (RenderMode) savedInstanceState.getSerializable(EXTRA_RENDER_MODE);
             presenter.recoverFromBundle(savedInstanceState);
         } else {
             presenter.onFreshStart();
@@ -354,7 +404,7 @@ public class ExpressPaymentFragment extends Fragment implements ExpressPayment.V
             paymentMethodFragmentAdapter = new PaymentMethodFragmentAdapter(getChildFragmentManager());
             if (renderMode == null) {
                 summaryView.setMeasureListener((itemsClipped) -> {
-                    renderMode = itemsClipped ? LOW_RES : HIGH_RES;
+                    renderMode = itemsClipped ? RenderMode.LOW_RES : RenderMode.HIGH_RES;
                     onRenderModeDecided();
                 });
             } else {

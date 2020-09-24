@@ -22,6 +22,7 @@ import com.mercadopago.android.px.internal.base.PXActivity;
 import com.mercadopago.android.px.internal.di.CheckoutConfigurationModule;
 import com.mercadopago.android.px.internal.di.Session;
 import com.mercadopago.android.px.internal.features.Constants;
+import com.mercadopago.android.px.internal.features.express.RenderMode;
 import com.mercadopago.android.px.internal.features.pay_button.PayButton;
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment;
 import com.mercadopago.android.px.internal.features.review_and_confirm.components.ReviewAndConfirmContainer;
@@ -285,6 +286,12 @@ public final class ReviewAndConfirmActivity extends PXActivity<ReviewAndConfirmP
     @Override
     public void onPostPaymentAction(@NotNull final PostPaymentAction postPaymentAction) {
         presenter.onPostPaymentAction(postPaymentAction);
+    }
+
+    @NonNull
+    @Override
+    public PayButton.CvvRequestedModel onCvvRequested() {
+        return new PayButton.CvvRequestedModel(0, RenderMode.NO_CARD);
     }
 
     public static final class ContainerProps {

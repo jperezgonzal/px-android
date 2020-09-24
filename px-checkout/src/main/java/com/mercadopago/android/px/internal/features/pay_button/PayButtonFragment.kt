@@ -30,6 +30,7 @@ import com.mercadopago.android.px.internal.features.payment_congrats.PaymentCong
 import com.mercadopago.android.px.internal.features.payment_result.PaymentResultActivity
 import com.mercadopago.android.px.internal.features.plugins.PaymentProcessorActivity
 import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment
+import com.mercadopago.android.px.internal.features.security_code.model.SecurityCodeParams
 import com.mercadopago.android.px.internal.util.FragmentUtil
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.view.OnSingleClickListener
@@ -71,11 +72,9 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
         with(viewModel) {
             buttonTextLiveData.observe(viewLifecycleOwner,
-                    Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
+                Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
             cvvRequiredLiveData.observe(viewLifecycleOwner,
-                Observer { pair -> pair?.let { showSecurityCodeScreen(SecurityCodeFragment.newInstance(it.first, it.second)) } })
-            recoverRequiredLiveData.observe(viewLifecycleOwner,
-                Observer { pair -> pair?.let { showSecurityCodeScreen(SecurityCodeFragment.newInstance(it.first, it.second)) } })
+                Observer { params -> params?.let { showSecurityCodeScreen(it) } })
             stateUILiveData.observe(viewLifecycleOwner, Observer { state -> state?.let { onStateUIChanged(it) } })
         }
     }
@@ -164,7 +163,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQ_CODE_BIOMETRICS) {
             val securityRequested = data?.getBooleanExtra(
-                    BehaviourProvider.getSecurityBehaviour().extraResultKey, false) ?: false
+                BehaviourProvider.getSecurityBehaviour().extraResultKey, false) ?: false
             enable()
             onSecurityValidated(resultCode == Activity.RESULT_OK, securityRequested)
         } else if (requestCode == REQ_CODE_CONGRATS && resultCode == Constants.RESULT_ACTION) {
@@ -195,8 +194,8 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     private fun finishLoading(params: ExplodeDecorator) {
         ViewUtils.hideKeyboard(activity)
         childFragmentManager.findFragmentByTag(ExplodingFragment.TAG)
-                ?.let { (it as ExplodingFragment).finishLoading(params) }
-                ?: viewModel.hasFinishPaymentAnimation()
+            ?.let { (it as ExplodingFragment).finishLoading(params) }
+            ?: viewModel.hasFinishPaymentAnimation()
     }
 
     private fun startLoadingButton(paymentTimeout: Int, buttonConfig: ButtonConfig) {
@@ -222,9 +221,9 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         val fragment = childFragmentManager.findFragmentByTag(ExplodingFragment.TAG) as ExplodingFragment?
         if (fragment != null && fragment.isAdded && fragment.hasFinished()) {
             childFragmentManager
-                    .beginTransaction()
-                    .remove(fragment)
-                    .commitNowAllowingStateLoss()
+                .beginTransaction()
+                .remove(fragment)
+                .commitNowAllowingStateLoss()
             restoreStatusBar()
         }
         enable()
@@ -248,11 +247,12 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         }
     }
 
-    private fun showSecurityCodeScreen(securityCodeFragment: SecurityCodeFragment) {
+    private fun showSecurityCodeScreen(params: SecurityCodeParams) {
         activity?.supportFragmentManager?.apply {
             findFragmentByTag(SecurityCodeFragment.TAG).runIfNull {
                 beginTransaction()
-                    .replace(R.id.one_tap_fragment, securityCodeFragment, SecurityCodeFragment.TAG)
+                    .setCustomAnimations(0, R.animator.px_onetap_cvv_dummy, 0, R.animator.px_onetap_cvv_dummy)
+                    .replace(params.fragmentContainer, SecurityCodeFragment.newInstance(params), SecurityCodeFragment.TAG)
                     .addToBackStack(SecurityCodeFragment.TAG)
                     .commitAllowingStateLoss()
             }

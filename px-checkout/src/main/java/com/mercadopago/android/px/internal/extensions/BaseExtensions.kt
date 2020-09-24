@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Rect
 import android.view.View
 import androidx.core.view.ViewCompat
+import androidx.fragment.app.Fragment
 
 internal fun CharSequence?.isNotNullNorEmpty() = !isNullOrEmpty()
 
@@ -26,6 +27,8 @@ internal fun <T : CharSequence> T?.runIfNotNullNorEmpty(action: (T) -> Unit): Bo
     }
     return false
 }
+
+internal fun Fragment.postDelayed(delay: Long, runnable: (() -> Unit)) = view?.postDelayed(runnable, delay)
 
 internal fun Activity.addKeyBoardListener(
     onKeyBoardOpen: (() -> Unit)? = null,

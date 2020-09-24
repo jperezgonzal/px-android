@@ -22,6 +22,8 @@ import com.mercadopago.android.px.R
 import com.mercadopago.android.px.core.BackHandler
 import com.mercadopago.android.px.internal.di.Session
 import com.mercadopago.android.px.internal.extensions.*
+import com.mercadopago.android.px.internal.features.express.RenderMode
+import com.mercadopago.android.px.internal.features.pay_button.PayButton
 import com.mercadopago.android.px.internal.features.pay_button.PayButton.OnReadyForPaymentCallback
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment
 import com.mercadopago.android.px.internal.font.PxFont
@@ -205,6 +207,8 @@ class OfflineMethodsFragment : Fragment(), OfflineMethods.View, BackHandler {
     override fun prePayment(callback: OnReadyForPaymentCallback) {
         viewModel.onPrePayment(callback)
     }
+
+    override fun onCvvRequested() = PayButton.CvvRequestedModel(R.id.one_tap_fragment, RenderMode.NO_CARD)
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

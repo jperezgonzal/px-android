@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.PagerAdapter
 import android.view.ViewGroup
+import com.mercadopago.android.px.internal.features.express.RenderMode
 import com.mercadopago.android.px.internal.viewmodel.drawables.DrawableFragmentItem
 import com.mercadopago.android.px.internal.viewmodel.drawables.PaymentMethodFragmentDrawer
 
@@ -45,9 +46,5 @@ class PaymentMethodFragmentAdapter(fm: FragmentManager) : FragmentStatePagerAdap
             drawer = PaymentMethodLowResDrawer()
             notifyDataSetChanged()
         }
-    }
-
-    enum class RenderMode {
-        HIGH_RES, LOW_RES
     }
 }

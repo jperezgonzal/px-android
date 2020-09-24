@@ -3,6 +3,7 @@ package com.mercadopago;
 import android.app.Application;
 import android.content.Context;
 import androidx.multidex.MultiDex;
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.mercadopago.android.px.BuildConfig;
@@ -31,6 +32,7 @@ public class SampleApplication extends Application {
     }
 
     private void initialize() {
+        Fresco.initialize(this);
         Stetho.initializeWithDefaults(this);
 
         // Create client base, add interceptors

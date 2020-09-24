@@ -58,7 +58,7 @@
         app:layout_constraintTop_toBottomOf="@+id/cvv_title"
         tools:text="Búscalo en el Home Banking o la app de CAIXA." />
 
-    <com.meli.android.carddrawer.model.CardDrawerView
+    <com.meli.android.carddrawer.model.CardDrawerViewLowres
         android:id="@+id/card_drawer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_goneMarginTop="24dp"
-        android:layout_marginTop="140dp"
+        android:layout_marginTop="80dp"
         android:layout_marginEnd="80dp"
         android:layout_marginStart="80dp"
         android:inputType="number"

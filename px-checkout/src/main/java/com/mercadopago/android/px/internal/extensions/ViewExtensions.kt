@@ -23,6 +23,22 @@ internal fun View?.addOnLaidOutListener(onLaidOut: ((view: View) -> Unit)) {
     }
 }
 
+internal fun <T : View> T?.runWhenLaidOut(onLaidOut: ((view: T) -> Unit)) {
+    this?.let {
+        if (ViewCompat.isLaidOut(it)) {
+            onLaidOut.invoke(it)
+        } else {
+            it.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(v: View?, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int,
+                    oldTop: Int, oldRight: Int, oldBottom: Int) {
+                    v?.apply { onLaidOut(it) }
+                    it.removeOnLayoutChangeListener(this)
+                }
+            })
+        }
+    }
+}
+
 internal fun View?.setHeight(height: Int) {
     this?.let {
         val layout = it.layoutParams

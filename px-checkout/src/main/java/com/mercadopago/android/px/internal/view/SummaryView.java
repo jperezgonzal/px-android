@@ -237,7 +237,7 @@ public class SummaryView extends LinearLayout {
             final int availableSummaryHeight = itemsMaxSize.getMeasuredHeight();
             final float singleItemHeight = AmountDescriptorView.getDesiredHeight(getContext());
             final int expectedItemsHeight = Math.round(singleItemHeight * maxElementsToShow);
-            measureListener.onSummaryMeasured(expectedItemsHeight > availableSummaryHeight);
+            measureListener.onSummaryMeasured(/*expectedItemsHeight > availableSummaryHeight*/false);
         }
     }
 

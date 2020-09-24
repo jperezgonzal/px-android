@@ -9,15 +9,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ScrollView;
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.core.content.ContextCompat;
-import android.view.View;
-import android.widget.ScrollView;
 import com.mercadolibre.android.andesui.snackbar.AndesSnackbar;
 import com.mercadolibre.android.andesui.snackbar.duration.AndesSnackbarDuration;
 import com.mercadolibre.android.andesui.snackbar.type.AndesSnackbarType;
@@ -28,6 +28,7 @@ import com.mercadopago.android.px.internal.base.PXActivity;
 import com.mercadopago.android.px.internal.di.Session;
 import com.mercadopago.android.px.internal.extensions.BaseExtensionsKt;
 import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultActivity;
+import com.mercadopago.android.px.internal.features.express.RenderMode;
 import com.mercadopago.android.px.internal.features.pay_button.PayButton;
 import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment;
 import com.mercadopago.android.px.internal.features.payment_result.components.PaymentResultLegacyRenderer;
@@ -270,6 +271,12 @@ public class PaymentResultActivity extends PXActivity<PaymentResultPresenter> im
     @Override
     public void enqueueOnExploding(@NonNull final PayButton.OnEnqueueResolvedCallback callback) {
         remediesFragment.onPayButtonPressed(callback);
+    }
+
+    @NonNull
+    @Override
+    public PayButton.CvvRequestedModel onCvvRequested() {
+        return new PayButton.CvvRequestedModel(0, RenderMode.NO_CARD);
     }
 
     @Override

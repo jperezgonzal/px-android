@@ -39,15 +39,16 @@ internal class SecurityCodeViewModel(
 
     private lateinit var paymentConfiguration: PaymentConfiguration
     private lateinit var securityCodeTracker: SecurityCodeTracker
+    private lateinit var reason: Reason
     private var paymentRecovery: PaymentRecovery? = null
-    private var reason: Reason? = null
 
-    fun init(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery?, reason: Reason) {
+    fun init(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery?, reason: Reason?) {
         this.paymentConfiguration = paymentConfiguration
         this.paymentRecovery = paymentRecovery
-        this.reason = reason
+        this.reason = reason ?: paymentRecovery?.let { Reason.from(it) } ?:
+            error("PaymentRecovery or Reason are required for SecurityCode Screen")
 
-        trackModelUseCase.execute(reason, success = { tracker ->
+        trackModelUseCase.execute(this.reason, success = { tracker ->
             securityCodeTracker = tracker
             securityCodeTracker.trackSecurityCode()
         })

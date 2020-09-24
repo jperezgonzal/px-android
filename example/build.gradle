@@ -74,7 +74,7 @@ dependencies {
     implementation "com.mercadolibre.android:ui:$ui"
 
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayout"
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanary"
+    //debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanary"
     debugBetaImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanary"
     androidTestImplementation project(':px-testlib')
     androidTestImplementation project(':testlib')

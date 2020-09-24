@@ -1,6 +1,7 @@
 package com.mercadopago.android.px.internal.features.pay_button
 
 import com.mercadopago.android.px.internal.features.explode.ExplodingFragment
+import com.mercadopago.android.px.internal.features.express.RenderMode
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PostPaymentAction
 import com.mercadopago.android.px.model.PaymentRecovery
@@ -34,6 +35,7 @@ interface PayButton {
         fun prePayment(callback: OnReadyForPaymentCallback)
         @JvmDefault fun enqueueOnExploding(callback: OnEnqueueResolvedCallback) = callback.success()
         @JvmDefault fun onPostPaymentAction(postPaymentAction: PostPaymentAction) = Unit
+        fun onCvvRequested(): CvvRequestedModel
         @JvmDefault fun onPaymentFinished(paymentModel: PaymentModel, callback: OnPaymentFinishedCallback) = callback.call()
         @JvmDefault fun onPaymentError(error: MercadoPagoError) = Unit
     }
@@ -50,4 +52,6 @@ interface PayButton {
     interface OnPaymentFinishedCallback {
         fun call()
     }
+
+    data class CvvRequestedModel(val fragmentContainer: Int, val renderMode: RenderMode)
 }
