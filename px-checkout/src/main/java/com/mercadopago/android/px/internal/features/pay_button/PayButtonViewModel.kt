@@ -20,7 +20,6 @@ import com.mercadopago.android.px.internal.model.SecurityType
 import com.mercadopago.android.px.internal.repository.CustomTextsRepository
 import com.mercadopago.android.px.internal.repository.PaymentRepository
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
-import com.mercadopago.android.px.internal.util.ApiUtil
 import com.mercadopago.android.px.internal.util.SecurityValidationDataFactory
 import com.mercadopago.android.px.internal.viewmodel.BusinessPaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel
@@ -28,12 +27,13 @@ import com.mercadopago.android.px.internal.viewmodel.PostPaymentAction
 import com.mercadopago.android.px.internal.viewmodel.custom.MediatorSingleLiveData
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 import com.mercadopago.android.px.model.*
+import com.mercadopago.android.px.model.Currency
 import com.mercadopago.android.px.model.exceptions.MercadoPagoError
-import com.mercadopago.android.px.model.exceptions.NoConnectivityException
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.events.BiometricsFrictionTracker
 import com.mercadopago.android.px.tracking.internal.events.ConfirmEvent
 import com.mercadopago.android.px.tracking.internal.events.FrictionEventTracker
+import com.mercadopago.android.px.tracking.internal.events.NoConnectionFrictionTracker
 import com.mercadopago.android.px.tracking.internal.model.ConfirmData
 import com.mercadopago.android.px.tracking.internal.model.Reason
 import com.mercadopago.android.px.tracking.internal.views.OneTapViewTracker
@@ -49,7 +49,6 @@ internal class PayButtonViewModel(
 
     val buttonTextLiveData = MutableLiveData<ButtonConfig>()
     private var buttonConfig: ButtonConfig = payButtonViewModelMapper.map(customTextsRepository.customTexts)
-    private val connectivityError = MercadoPagoError(ApiUtil.getApiException(NoConnectivityException()), null)
     private var retryCounter = 0
 
     init {
@@ -219,13 +218,17 @@ internal class PayButtonViewModel(
     }
 
     private fun manageNoConnection() {
-        trackNoRecoverableFriction(connectivityError)
+        trackNoConnectionFriction()
         stateUILiveData.value = UIError.ConnectionError(++retryCounter)
     }
 
     private fun trackNoRecoverableFriction(error: MercadoPagoError) {
         FrictionEventTracker.with(OneTapViewTracker.PATH_REVIEW_ONE_TAP_VIEW,
             FrictionEventTracker.Id.GENERIC, FrictionEventTracker.Style.CUSTOM_COMPONENT, error).track()
+    }
+
+    private fun trackNoConnectionFriction() {
+        NoConnectionFrictionTracker.track()
     }
 
     private fun noRecoverableError(error: MercadoPagoError) {

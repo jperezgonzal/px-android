@@ -4,8 +4,8 @@ import android.content.Context
 import com.mercadopago.android.px.internal.repository.ChargeRepository
 import com.mercadopago.android.px.internal.repository.DisabledPaymentMethodRepository
 import com.mercadopago.android.px.internal.util.TextUtil
-import com.mercadopago.android.px.internal.viewmodel.CardDrawerConfiguration
 import com.mercadopago.android.px.internal.viewmodel.DisableConfiguration
+import com.mercadopago.android.px.internal.viewmodel.mappers.CardUiMapper
 import com.mercadopago.android.px.internal.viewmodel.mappers.NonNullMapper
 import com.mercadopago.android.px.model.CustomSearchItem
 import com.mercadopago.android.px.model.ExpressMetadata
@@ -24,7 +24,7 @@ class PaymentMethodDrawableItemMapper(
 
         return when {
             expressMetadata.isCard -> SavedCardDrawableFragmentItem(parameters, expressMetadata.paymentMethodId,
-                CardDrawerConfiguration(expressMetadata.card.displayInfo, disableConfiguration))
+                CardUiMapper(disableConfiguration).map(expressMetadata.card.displayInfo))
             expressMetadata.isAccountMoney -> AccountMoneyDrawableFragmentItem(parameters)
             expressMetadata.isConsumerCredits ->
                 ConsumerCreditsDrawableFragmentItem(parameters, expressMetadata.consumerCredits)

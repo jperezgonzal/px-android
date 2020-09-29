@@ -5,22 +5,27 @@ import androidx.lifecycle.MutableLiveData
 import com.mercadopago.android.px.internal.base.BaseViewModel
 import com.mercadopago.android.px.internal.features.pay_button.PayButton
 import com.mercadopago.android.px.internal.features.security_code.model.VirtualCardInfo
-import com.mercadopago.android.px.internal.features.security_code.use_case.DisplayInfoUseCase
+import com.mercadopago.android.px.internal.features.security_code.domain.use_case.DisplayDataUseCase
 import com.mercadopago.android.px.internal.base.use_case.TokenizeParams
 import com.mercadopago.android.px.internal.base.use_case.TokenizeUseCase
+import com.mercadopago.android.px.internal.features.security_code.domain.use_case.SecurityTrackModelUseCase
+import com.mercadopago.android.px.internal.features.security_code.tracking.SecurityCodeTracker
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
-import com.mercadopago.android.px.internal.viewmodel.CardDrawerConfiguration
+import com.mercadopago.android.px.internal.viewmodel.CardUiConfiguration
+import com.mercadopago.android.px.internal.viewmodel.mappers.CardUiMapper
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
 
-class SecurityCodeViewModel(
+internal class SecurityCodeViewModel(
     private val paymentSettingRepository: PaymentSettingRepository,
     private val tokenizeUseCase: TokenizeUseCase,
-    displayInfoUseCase: DisplayInfoUseCase) : BaseViewModel() {
+    private val displayDataUseCase: DisplayDataUseCase,
+    private val trackModelUseCase: SecurityTrackModelUseCase,
+    private val cardUiMapper: CardUiMapper) : BaseViewModel() {
 
-    private val cvvCardUiMutableLiveData = MutableLiveData<CardDrawerConfiguration>()
-    val cvvCardUiLiveData: LiveData<CardDrawerConfiguration>
+    private val cvvCardUiMutableLiveData = MutableLiveData<CardUiConfiguration>()
+    val cvvCardUiLiveData: LiveData<CardUiConfiguration>
         get() = cvvCardUiMutableLiveData
     private val virtualCardInfoMutableLiveData = MutableLiveData<VirtualCardInfo>()
     val virtualCardInfoLiveData: LiveData<VirtualCardInfo>
@@ -33,27 +38,37 @@ class SecurityCodeViewModel(
         get() = tokenizeErrorApiMutableLiveData
 
     private lateinit var paymentConfiguration: PaymentConfiguration
+    private lateinit var securityCodeTracker: SecurityCodeTracker
     private var paymentRecovery: PaymentRecovery? = null
     private var reason: Reason? = null
 
-    init {
-        displayInfoUseCase.execute(Unit, success = { triple ->
-            val (cardDisplayInfo, cvvInfo, securityCodeLength) = triple
-            cardDisplayInfo?.let { cvvCardUiMutableLiveData.postValue(CardDrawerConfiguration(cardDisplayInfo, null)) }
-            cvvInfo?.let { virtualCardInfoMutableLiveData.value = VirtualCardInfo(it.title, it.message) }
-            inputInfoMutableLiveData.value = securityCodeLength
-        }, failure = {
-            //TODO: Friction
-        })
-    }
-
-    fun init(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery?, reason: Reason?) {
+    fun init(paymentConfiguration: PaymentConfiguration, paymentRecovery: PaymentRecovery?, reason: Reason) {
         this.paymentConfiguration = paymentConfiguration
         this.paymentRecovery = paymentRecovery
         this.reason = reason
+
+        trackModelUseCase.execute(reason, success = { tracker ->
+            securityCodeTracker = tracker
+            securityCodeTracker.trackSecurityCode()
+        })
+
+        displayDataUseCase.execute(Unit, success = { displayData ->
+            displayData.cardDisplayInfo?.let { cvvCardUiMutableLiveData.postValue(cardUiMapper.map(it)) }
+            displayData.virtualCardInfo?.let { virtualCardInfoMutableLiveData.value = VirtualCardInfo(it.title, it.message) }
+            inputInfoMutableLiveData.value = displayData.securityCodeLength
+        })
+    }
+
+    fun onBack() {
+        securityCodeTracker.trackAbortSecurityCode()
+    }
+
+    fun onPaymentError() {
+        securityCodeTracker.trackPaymentApiError()
     }
 
     fun handlePrepayment(callback: PayButton.OnReadyForPaymentCallback) {
+        securityCodeTracker.trackConfirmSecurityCode()
         callback.call(paymentConfiguration)
     }
 
@@ -62,9 +77,11 @@ class SecurityCodeViewModel(
             success = { token ->
                 paymentSettingRepository.configure(token)
                 callback.success()
-            }, failure = {
-            tokenizeErrorApiMutableLiveData.value = Unit
-            callback.failure()
-        })
+            },
+            failure = {
+                securityCodeTracker.trackTokenApiError()
+                tokenizeErrorApiMutableLiveData.value = Unit
+                callback.failure()
+            })
     }
 }

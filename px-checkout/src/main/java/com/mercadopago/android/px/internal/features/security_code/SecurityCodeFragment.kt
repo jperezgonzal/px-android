@@ -24,6 +24,7 @@ import com.mercadopago.android.px.internal.features.pay_button.PayButtonFragment
 import com.mercadopago.android.px.internal.util.ViewUtils
 import com.mercadopago.android.px.internal.util.nonNullObserve
 import com.mercadopago.android.px.model.PaymentRecovery
+import com.mercadopago.android.px.model.exceptions.MercadoPagoError
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
 
@@ -73,10 +74,12 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
                 "PaymentRecovery or PaymentConfiguration and Reason are needed"
             }
 
+            val paymentRecovery = getParcelable<PaymentRecovery>(EXTRA_PAYMENT_RECOVERY)
+            val reason = paymentRecovery?.let { Reason.from(it) } ?: getString(EXTRA_REASON)?.let { Reason.valueOf(it) }
             securityCodeViewModel.init(
                 getParcelable(EXTRA_PAYMENT_CONFIGURATION)!!,
-                getParcelable(EXTRA_PAYMENT_RECOVERY),
-                getString(EXTRA_REASON)?.let { Reason.valueOf(it) })
+                paymentRecovery,
+                reason!!)
 
         } ?: error("Arguments not be null")
 
@@ -126,7 +129,15 @@ internal class SecurityCodeFragment : Fragment(), PayButton.Handler, BackHandler
         securityCodeViewModel.enqueueOnExploding(cvvEditText.text.toString(), callback)
     }
 
-    override fun handleBack() = payButtonFragment.isExploding()
+    override fun onPaymentError(error: MercadoPagoError) {
+        securityCodeViewModel.onPaymentError()
+    }
+
+    override fun handleBack() = payButtonFragment.isExploding().also { isExploding ->
+        if (!isExploding) {
+            securityCodeViewModel.onBack()
+        }
+    }
 
     companion object {
         const val TAG = "security_code"

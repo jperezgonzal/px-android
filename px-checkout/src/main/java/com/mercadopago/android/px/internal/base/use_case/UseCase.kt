@@ -21,9 +21,8 @@ abstract class UseCase<in P, out R> {
                     withContext(Dispatchers.Main) { response.resolve(success, failure) }
                 }
             } catch (e: Exception) {
-                failure(MercadoPagoError(
-                    e.localizedMessage.orIfEmpty("Error when build ${this@UseCase.javaClass}"),
-                    false))
+                val errorMessage = e.localizedMessage.orIfEmpty("Error when execute ${this@UseCase.javaClass}")
+                withContext(Dispatchers.Main) { failure(MercadoPagoError(errorMessage, false)) }
             }
         }
     }
