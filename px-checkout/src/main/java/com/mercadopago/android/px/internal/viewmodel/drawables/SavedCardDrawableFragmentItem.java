@@ -3,12 +3,12 @@ package com.mercadopago.android.px.internal.viewmodel.drawables;
 import android.os.Parcel;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import com.mercadopago.android.px.internal.viewmodel.CardDrawerConfiguration;
+import com.mercadopago.android.px.internal.viewmodel.CardUiConfiguration;
 
 public class SavedCardDrawableFragmentItem extends DrawableFragmentItem {
 
     @NonNull public final String paymentMethodId;
-    @NonNull public final CardDrawerConfiguration card;
+    @NonNull public final CardUiConfiguration card;
 
     public static final Creator<SavedCardDrawableFragmentItem> CREATOR = new Creator<SavedCardDrawableFragmentItem>() {
         @Override
@@ -23,7 +23,7 @@ public class SavedCardDrawableFragmentItem extends DrawableFragmentItem {
     };
 
     public SavedCardDrawableFragmentItem(@NonNull final Parameters parameters, @NonNull final String paymentMethodId,
-        @NonNull final CardDrawerConfiguration card) {
+        @NonNull final CardUiConfiguration card) {
         super(parameters);
         this.paymentMethodId = paymentMethodId;
         this.card = card;
@@ -32,7 +32,7 @@ public class SavedCardDrawableFragmentItem extends DrawableFragmentItem {
     protected SavedCardDrawableFragmentItem(final Parcel in) {
         super(in);
         paymentMethodId = in.readString();
-        card = in.readParcelable(CardDrawerConfiguration.class.getClassLoader());
+        card = in.readParcelable(CardUiConfiguration.class.getClassLoader());
     }
 
     @Override

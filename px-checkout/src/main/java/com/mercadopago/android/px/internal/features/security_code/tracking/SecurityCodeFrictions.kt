@@ -4,12 +4,8 @@ import com.mercadopago.android.px.tracking.internal.events.FrictionEventTracker
 import com.mercadopago.android.px.tracking.internal.model.TrackingMapModel
 import java.util.*
 
-class SecurityCodeFrictions {
-    private val data = mutableMapOf<String, Any>()
-
-    fun setTrackData(data: TrackingMapModel) {
-        this.data.putAll(data.toMap())
-    }
+class SecurityCodeFrictions(model: TrackingMapModel) {
+    private val data = model.toMap()
 
     fun trackPaymentApiError() {
         val frictionId = FrictionEventTracker.Id.PAYMENTS_API_ERROR

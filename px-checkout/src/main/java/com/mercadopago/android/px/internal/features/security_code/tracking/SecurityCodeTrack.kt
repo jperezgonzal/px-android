@@ -4,15 +4,10 @@ import com.mercadopago.android.px.tracking.internal.TrackWrapper
 import com.mercadopago.android.px.tracking.internal.model.Reason
 import com.mercadopago.android.px.tracking.internal.model.TrackingMapModel
 
-abstract class SecurityCodeTrack: TrackWrapper() {
+abstract class SecurityCodeTrack(securityCodeData: TrackingMapModel, reason: Reason): TrackWrapper() {
 
-    protected val data = mutableMapOf<String, Any>()
+    protected val data = mutableMapOf<String, Any>("reason" to reason.name).also { it.putAll(securityCodeData.toMap()) }
     protected var actionPath: String = ""
-
-    fun setTrackData(securityCodeData: TrackingMapModel, reason: Reason) {
-        data.putAll(securityCodeData.toMap())
-        data["reason"] = reason.name
-    }
 
     companion object {
         const val ACTION_BASE_PATH = "${BASE_PATH}/security_code"

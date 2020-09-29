@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import com.meli.android.carddrawer.model.CardDrawerView;
 import com.mercadopago.android.px.R;
 import com.mercadopago.android.px.internal.util.TextUtil;
-import com.mercadopago.android.px.internal.viewmodel.CardDrawerConfiguration;
+import com.mercadopago.android.px.internal.viewmodel.CardUiConfiguration;
 import com.mercadopago.android.px.internal.viewmodel.drawables.SavedCardDrawableFragmentItem;
 
 public class SavedCardFragment extends PaymentMethodFragment<SavedCardDrawableFragmentItem> {
@@ -37,7 +37,7 @@ public class SavedCardFragment extends PaymentMethodFragment<SavedCardDrawableFr
         super.initializeViews(view);
         cardView = view.findViewById(R.id.card);
 
-        final CardDrawerConfiguration card = model.card;
+        final CardUiConfiguration card = model.card;
 
         cardView.getCard().setName(card.getName());
         cardView.getCard().setExpiration(card.getDate());

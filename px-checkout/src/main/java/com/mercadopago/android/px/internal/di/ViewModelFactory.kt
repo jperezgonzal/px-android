@@ -10,7 +10,7 @@ import com.mercadopago.android.px.internal.features.security_code.domain.use_cas
 import com.mercadopago.android.px.internal.base.use_case.TokenizeUseCase
 import com.mercadopago.android.px.internal.features.security_code.domain.use_case.SecurityTrackModelUseCase
 import com.mercadopago.android.px.internal.features.security_code.mapper.BusinessSecurityCodeDisplayDataMapper
-import com.mercadopago.android.px.internal.features.security_code.tracking.*
+import com.mercadopago.android.px.internal.viewmodel.mappers.CardUiMapper
 import com.mercadopago.android.px.internal.viewmodel.mappers.PayButtonViewModelMapper
 
 internal class ViewModelFactory : ViewModelProvider.Factory {
@@ -50,9 +50,9 @@ internal class ViewModelFactory : ViewModelProvider.Factory {
                 SecurityCodeViewModel(
                     configurationModule.paymentSettings,
                     tokenizeUseCase,
-                    SecurityCodeTracker(SecurityCodeViewTrack(), SecurityCodeEventTrack(), SecurityCodeFrictions()),
                     displayDataUseCase,
-                    SecurityTrackModelUseCase(userSelectionRepository))
+                    SecurityTrackModelUseCase(userSelectionRepository),
+                    CardUiMapper())
             }
             else -> {
                 throw IllegalArgumentException("Unknown ViewModel class")

@@ -12,6 +12,7 @@ import com.mercadopago.android.px.internal.features.security_code.domain.use_cas
 import com.mercadopago.android.px.internal.features.security_code.tracking.SecurityCodeTracker
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
 import com.mercadopago.android.px.internal.viewmodel.CardUiConfiguration
+import com.mercadopago.android.px.internal.viewmodel.mappers.CardUiMapper
 import com.mercadopago.android.px.model.PaymentRecovery
 import com.mercadopago.android.px.model.internal.PaymentConfiguration
 import com.mercadopago.android.px.tracking.internal.model.Reason
@@ -19,9 +20,9 @@ import com.mercadopago.android.px.tracking.internal.model.Reason
 internal class SecurityCodeViewModel(
     private val paymentSettingRepository: PaymentSettingRepository,
     private val tokenizeUseCase: TokenizeUseCase,
-    private val securityCodeTracker: SecurityCodeTracker,
     private val displayDataUseCase: DisplayDataUseCase,
-    private val trackModelUseCase: SecurityTrackModelUseCase) : BaseViewModel() {
+    private val trackModelUseCase: SecurityTrackModelUseCase,
+    private val cardUiMapper: CardUiMapper) : BaseViewModel() {
 
     private val cvvCardUiMutableLiveData = MutableLiveData<CardUiConfiguration>()
     val cvvCardUiLiveData: LiveData<CardUiConfiguration>
@@ -37,6 +38,7 @@ internal class SecurityCodeViewModel(
         get() = tokenizeErrorApiMutableLiveData
 
     private lateinit var paymentConfiguration: PaymentConfiguration
+    private lateinit var securityCodeTracker: SecurityCodeTracker
     private var paymentRecovery: PaymentRecovery? = null
     private var reason: Reason? = null
 
@@ -45,13 +47,13 @@ internal class SecurityCodeViewModel(
         this.paymentRecovery = paymentRecovery
         this.reason = reason
 
-        trackModelUseCase.execute(Unit, success = {
-            securityCodeTracker.setTrackData(it, reason)
+        trackModelUseCase.execute(reason, success = { tracker ->
+            securityCodeTracker = tracker
             securityCodeTracker.trackSecurityCode()
         })
 
         displayDataUseCase.execute(Unit, success = { displayData ->
-            displayData.cardDisplayInfo?.let { cvvCardUiMutableLiveData.postValue(CardUiConfiguration(it, null)) }
+            displayData.cardDisplayInfo?.let { cvvCardUiMutableLiveData.postValue(cardUiMapper.map(it)) }
             displayData.virtualCardInfo?.let { virtualCardInfoMutableLiveData.value = VirtualCardInfo(it.title, it.message) }
             inputInfoMutableLiveData.value = displayData.securityCodeLength
         })
