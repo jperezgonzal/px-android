@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import com.mercadopago.android.px.model.BusinessPayment;
 import com.mercadopago.android.px.model.ExitAction;
 import com.mercadopago.android.px.model.GenericPayment;
-import com.mercadopago.android.px.model.IPaymentDescriptor;
+import com.mercadopago.android.px.model.IParcelablePaymentDescriptor;
 import com.mercadopago.android.px.model.Payment;
 import com.mercadopago.android.px.model.internal.GenericPaymentDescriptor;
 import com.mercadopago.example.R;
@@ -25,7 +25,7 @@ public final class PaymentUtils {
     }
 
     @NonNull
-    public static IPaymentDescriptor getGenericPaymentApproved() {
+    public static IParcelablePaymentDescriptor getGenericPaymentApproved() {
         return GenericPaymentDescriptor.with(new GenericPayment.Builder(
             Payment.StatusCodes.STATUS_APPROVED,
             Payment.StatusDetail.STATUS_DETAIL_ACCREDITED
@@ -33,7 +33,7 @@ public final class PaymentUtils {
     }
 
     @NonNull
-    public static IPaymentDescriptor getGenericPaymentRejected() {
+    public static IParcelablePaymentDescriptor getGenericPaymentRejected() {
         return GenericPaymentDescriptor.with(new GenericPayment.Builder(
             Payment.StatusCodes.STATUS_REJECTED,
             Payment.StatusDetail.STATUS_DETAIL_CC_REJECTED_BAD_FILLED_SECURITY_CODE

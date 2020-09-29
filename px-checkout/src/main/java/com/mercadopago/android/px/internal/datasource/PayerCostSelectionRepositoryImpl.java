@@ -2,6 +2,7 @@ package com.mercadopago.android.px.internal.datasource;
 
 import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.google.gson.reflect.TypeToken;
 import com.mercadopago.android.px.internal.repository.PayerCostSelectionRepository;
 import com.mercadopago.android.px.internal.util.JsonUtil;
@@ -15,7 +16,7 @@ public class PayerCostSelectionRepositoryImpl implements PayerCostSelectionRepos
     private static final String PREF_SELECTED_PAYER_COSTS = "PREF_SELECTED_PAYER_COSTS";
 
     @NonNull private final SharedPreferences sharedPreferences;
-    private Map<String, Integer> selectedPayerCosts;
+    @Nullable private Map<String, Integer> selectedPayerCosts;
 
     public PayerCostSelectionRepositoryImpl(@NonNull final SharedPreferences sharedPreferences) {
         this.sharedPreferences = sharedPreferences;
@@ -38,6 +39,7 @@ public class PayerCostSelectionRepositoryImpl implements PayerCostSelectionRepos
     @Override
     public void reset() {
         sharedPreferences.edit().remove(PREF_SELECTED_PAYER_COSTS).apply();
+        selectedPayerCosts = null;
     }
 
     @NonNull

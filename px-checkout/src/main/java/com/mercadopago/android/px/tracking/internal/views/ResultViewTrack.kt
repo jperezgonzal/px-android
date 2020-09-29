@@ -1,9 +1,9 @@
 package com.mercadopago.android.px.tracking.internal.views
 
 import com.mercadopago.android.px.configuration.PaymentResultScreenConfiguration
+import com.mercadopago.android.px.internal.features.payment_congrats.model.PaymentCongratsModel
 import com.mercadopago.android.px.internal.features.payment_result.remedies.RemedyType
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
-import com.mercadopago.android.px.internal.viewmodel.BusinessPaymentModel
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel
 import com.mercadopago.android.px.model.PaymentResult
 import com.mercadopago.android.px.model.internal.remedies.RemediesResponse
@@ -17,33 +17,37 @@ class ResultViewTrack : TrackWrapper {
     private val resultViewTrackModel: ResultViewTrackModel
     private val paymentStatus: String
     private val remediesResponse: RemediesResponse
+    private var isPaymentCongratsFlow: Boolean = false
+    private var isStandaloneCongrats: Boolean = false
 
     constructor(paymentModel: PaymentModel, screenConfiguration: PaymentResultScreenConfiguration,
-        paymentSetting: PaymentSettingRepository, isMP: Boolean) {
+                paymentSetting: PaymentSettingRepository, isMP: Boolean) {
         resultViewTrackModel = ResultViewTrackModel(paymentModel, screenConfiguration, paymentSetting.checkoutPreference!!,
-            paymentSetting.currency.id, isMP)
+                paymentSetting.currency.id, isMP)
         paymentStatus = getMappedResult(paymentModel.paymentResult)
         this.remediesResponse = paymentModel.remedies
     }
 
-    constructor(paymentModel: BusinessPaymentModel, paymentSetting: PaymentSettingRepository, isMP: Boolean) {
-        resultViewTrackModel = ResultViewTrackModel(paymentModel, paymentSetting.checkoutPreference!!,
-            paymentSetting.currency.id, isMP)
-        paymentStatus = getMappedResult(paymentModel.paymentResult)
-        this.remediesResponse = paymentModel.remedies
+    constructor(paymentModel: PaymentCongratsModel, isMP: Boolean) {
+        isPaymentCongratsFlow = true
+        isStandaloneCongrats = paymentModel.isStandAloneCongrats
+        resultViewTrackModel = ResultViewTrackModel(paymentModel, isMP)
+        paymentStatus = paymentModel.trackingPaymentStatus
+        this.remediesResponse = RemediesResponse.EMPTY
     }
 
     override fun getTrack() = TrackFactory.withView(getViewPath()).addData(getData()).build()
 
     private fun getData(): Map<String, Any> {
         val map = resultViewTrackModel.toMap()
-        if (paymentStatus == ERROR) {
+        if (paymentStatus == ERROR && !isPaymentCongratsFlow) {
             map["remedies"] = getRemedies()
         }
         return map
     }
 
-    private fun getViewPath() = String.format(Locale.US, PATH, paymentStatus)
+    private fun getViewPath() = String.format(Locale.US,
+        if (isStandaloneCongrats) STANDALONE_PATH else CHECKOUT_PATH, paymentStatus)
 
     private fun getMappedResult(payment: PaymentResult): String {
         return when {
@@ -73,10 +77,12 @@ class ResultViewTrack : TrackWrapper {
     private fun getRemedyData(type: RemedyType) = RemedyTrackData(type.getType(), remediesResponse.trackingData)
 
     companion object {
-        private const val PATH = "$BASE_PATH/result/%s"
-        private const val SUCCESS = "success"
-        private const val PENDING = "further_action_needed"
-        private const val ERROR = "error"
-        private const val UNKNOWN = "unknown"
+        private const val PATH = "/result/%s"
+        private const val CHECKOUT_PATH = "$BASE_PATH$PATH"
+        private const val STANDALONE_PATH = "/payment_congrats$PATH"
+        const val SUCCESS = "success"
+        const val PENDING = "further_action_needed"
+        const val ERROR = "error"
+        const val UNKNOWN = "unknown"
     }
 }

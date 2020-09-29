@@ -2,9 +2,9 @@ package com.mercadopago.android.px.internal.repository;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.mercadopago.android.px.internal.model.SecurityType;
 import com.mercadopago.android.px.configuration.AdvancedConfiguration;
 import com.mercadopago.android.px.configuration.PaymentConfiguration;
+import com.mercadopago.android.px.internal.model.SecurityType;
 import com.mercadopago.android.px.model.Currency;
 import com.mercadopago.android.px.model.Site;
 import com.mercadopago.android.px.model.Token;
@@ -81,6 +81,4 @@ public interface PaymentSettingRepository {
     SecurityType getSecurityType();
 
     boolean hasToken();
-
-    boolean isPaymentConfigurationValid();
 }

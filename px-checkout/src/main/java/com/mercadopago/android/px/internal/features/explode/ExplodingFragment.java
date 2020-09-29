@@ -287,7 +287,9 @@ public class ExplodingFragment extends Fragment {
         final int cx = (progressBar.getLeft() + progressBar.getRight()) / 2;
         final int cy = (progressBar.getTop() + progressBar.getBottom()) / 2 + buttonYPosition;
 
+        final int startColor = explodeDecorator.getDarkPrimaryColor(getContext());
         final int endColor = explodeDecorator.getPrimaryColor(getContext());
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             circularReveal = ViewAnimationUtils.createCircularReveal(reveal, cx, cy, startRadius, finalRadius);
         } else {
@@ -303,7 +305,6 @@ public class ExplodingFragment extends Fragment {
                 icon.setVisibility(View.GONE);
                 reveal.setVisibility(View.VISIBLE);
 
-                final int startColor = explodeDecorator.getDarkPrimaryColor(getContext());
                 final Drawable[] switchColors =
                     { new ColorDrawable(startColor), new ColorDrawable(endColor) };
                 final TransitionDrawable colorSwitch = new TransitionDrawable(switchColors);

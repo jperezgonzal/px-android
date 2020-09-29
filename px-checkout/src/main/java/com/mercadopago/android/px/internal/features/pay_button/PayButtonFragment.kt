@@ -23,10 +23,10 @@ import com.mercadopago.android.px.internal.di.viewModel
 import com.mercadopago.android.px.internal.extensions.runIfNull
 import com.mercadopago.android.px.internal.extensions.showSnackBar
 import com.mercadopago.android.px.internal.features.Constants
-import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultActivity
 import com.mercadopago.android.px.internal.features.dummy_result.DummyResultActivity
 import com.mercadopago.android.px.internal.features.explode.ExplodeDecorator
 import com.mercadopago.android.px.internal.features.explode.ExplodingFragment
+import com.mercadopago.android.px.internal.features.payment_congrats.PaymentCongrats
 import com.mercadopago.android.px.internal.features.payment_result.PaymentResultActivity
 import com.mercadopago.android.px.internal.features.plugins.PaymentProcessorActivity
 import com.mercadopago.android.px.internal.features.security_code.SecurityCodeFragment
@@ -71,7 +71,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
 
         with(viewModel) {
             buttonTextLiveData.observe(viewLifecycleOwner,
-                Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
+                    Observer { buttonConfig -> button.text = buttonConfig!!.getButtonText(this@PayButtonFragment.context!!) })
             cvvRequiredLiveData.observe(viewLifecycleOwner,
                 Observer { pair -> pair?.let { showSecurityCodeScreen(SecurityCodeFragment.newInstance(it.first, it.second)) } })
             recoverRequiredLiveData.observe(viewLifecycleOwner,
@@ -96,9 +96,8 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             is UIResult.VisualProcessorResult -> PaymentProcessorActivity.start(this, REQ_CODE_PAYMENT_PROCESSOR)
             is UIError -> resolveError(stateUI)
             is UIResult.PaymentResult -> PaymentResultActivity.start(this, REQ_CODE_CONGRATS, stateUI.model)
-            is UIResult.BusinessPaymentResult ->
-                BusinessPaymentResultActivity.start(this, REQ_CODE_CONGRATS, stateUI.model)
             is UIResult.NoCongratsResult -> DummyResultActivity.start(this, REQ_CODE_CONGRATS, stateUI.model)
+            is UIResult.CongratsPaymentModel -> PaymentCongrats.show(stateUI.model, activity, REQ_CODE_CONGRATS)
         }
     }
 
@@ -165,7 +164,7 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQ_CODE_BIOMETRICS) {
             val securityRequested = data?.getBooleanExtra(
-                BehaviourProvider.getSecurityBehaviour().extraResultKey, false) ?: false
+                    BehaviourProvider.getSecurityBehaviour().extraResultKey, false) ?: false
             enable()
             onSecurityValidated(resultCode == Activity.RESULT_OK, securityRequested)
         } else if (requestCode == REQ_CODE_CONGRATS && resultCode == Constants.RESULT_ACTION) {
@@ -196,8 +195,8 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
     private fun finishLoading(params: ExplodeDecorator) {
         ViewUtils.hideKeyboard(activity)
         childFragmentManager.findFragmentByTag(ExplodingFragment.TAG)
-            ?.let { (it as ExplodingFragment).finishLoading(params) }
-            ?: viewModel.hasFinishPaymentAnimation()
+                ?.let { (it as ExplodingFragment).finishLoading(params) }
+                ?: viewModel.hasFinishPaymentAnimation()
     }
 
     private fun startLoadingButton(paymentTimeout: Int, buttonConfig: ButtonConfig) {
@@ -205,13 +204,13 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
             button.post {
                 if (!isAdded) {
                     FrictionEventTracker.with("/px_checkout/pay_button_loading", FrictionEventTracker.Id.GENERIC,
-                        FrictionEventTracker.Style.SCREEN, emptyMap<String, String>())
+                            FrictionEventTracker.Style.SCREEN, emptyMap<String, String>())
                 } else {
                     val explodingFragment = ExplodingFragment.newInstance(
                         buttonConfig.getButtonProgressText(it), paymentTimeout)
                     childFragmentManager.beginTransaction()
-                        .add(R.id.exploding_frame, explodingFragment, ExplodingFragment.TAG)
-                        .commitNowAllowingStateLoss()
+                            .add(R.id.exploding_frame, explodingFragment, ExplodingFragment.TAG)
+                            .commitNowAllowingStateLoss()
                     hideConfirmButton()
                 }
             }
@@ -223,9 +222,9 @@ class PayButtonFragment : Fragment(), PayButton.View, SecurityValidationHandler 
         val fragment = childFragmentManager.findFragmentByTag(ExplodingFragment.TAG) as ExplodingFragment?
         if (fragment != null && fragment.isAdded && fragment.hasFinished()) {
             childFragmentManager
-                .beginTransaction()
-                .remove(fragment)
-                .commitNowAllowingStateLoss()
+                    .beginTransaction()
+                    .remove(fragment)
+                    .commitNowAllowingStateLoss()
             restoreStatusBar()
         }
         enable()

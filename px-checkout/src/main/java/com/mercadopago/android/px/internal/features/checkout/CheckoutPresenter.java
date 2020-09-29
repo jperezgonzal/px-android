@@ -295,10 +295,12 @@ public class CheckoutPresenter extends BasePresenter<Checkout.View> implements C
     @Override
     public void cancelCheckout() {
         //TODO improve this
-        if (state.isExpressCheckout) {
-            getView().hideProgress();
-        } else {
-            getView().cancelCheckout();
+        if (isViewAttached()) {
+            if (state.isExpressCheckout) {
+                getView().hideProgress();
+            } else {
+                getView().cancelCheckout();
+            }
         }
     }
 

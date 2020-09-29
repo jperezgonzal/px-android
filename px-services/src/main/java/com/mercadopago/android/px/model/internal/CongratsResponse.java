@@ -34,7 +34,6 @@ public final class CongratsResponse implements Parcelable {
     @Nullable private final MoneySplit moneySplit;
     @SerializedName("cross_selling")
     private final List<CrossSelling> crossSellings;
-    private final Text topTextBox;
     private final Action viewReceipt;
     private final boolean customOrder;
     private final Map<String, String> paymentMethodsImages;
@@ -44,7 +43,6 @@ public final class CongratsResponse implements Parcelable {
         discount = null;
         moneySplit = null;
         crossSellings = Collections.emptyList();
-        topTextBox = Text.EMPTY;
         viewReceipt = null;
         customOrder = false;
         paymentMethodsImages = Collections.emptyMap();
@@ -55,7 +53,6 @@ public final class CongratsResponse implements Parcelable {
         discount = in.readParcelable(Discount.class.getClassLoader());
         moneySplit = in.readParcelable(MoneySplit.class.getClassLoader());
         crossSellings = in.createTypedArrayList(CrossSelling.CREATOR);
-        topTextBox = in.readParcelable(Text.class.getClassLoader());
         viewReceipt = in.readParcelable(Action.class.getClassLoader());
         customOrder = in.readInt() == 1;
         paymentMethodsImages = new HashMap<>();
@@ -68,7 +65,6 @@ public final class CongratsResponse implements Parcelable {
         dest.writeParcelable(discount, flags);
         dest.writeParcelable(moneySplit, flags);
         dest.writeTypedList(crossSellings);
-        dest.writeParcelable(topTextBox, flags);
         dest.writeParcelable(viewReceipt, flags);
         dest.writeInt(customOrder ? 1 : 0);
         dest.writeMap(paymentMethodsImages);
@@ -97,11 +93,6 @@ public final class CongratsResponse implements Parcelable {
     @NonNull
     public List<CrossSelling> getCrossSellings() {
         return crossSellings != null ? crossSellings : Collections.emptyList();
-    }
-
-    @NonNull
-    public Text getTopTextBox() {
-        return topTextBox != null ? topTextBox : Text.EMPTY;
     }
 
     @Nullable

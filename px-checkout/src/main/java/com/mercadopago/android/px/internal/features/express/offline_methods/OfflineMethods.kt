@@ -35,10 +35,8 @@ internal interface OfflineMethods {
     companion object {
         @JvmStatic
         fun shouldLaunch(expressMetadataList: List<ExpressMetadata>): Boolean {
-            return expressMetadataList.filter { express -> express.status.run { isActive &&  isEnabled } }
-                .run { size == 1 && get(0).isOfflineMethods }
+            return expressMetadataList.filter { express -> express.status.run { isEnabled } }
+                .run { size == 1 && with(get(0)) { isOfflineMethods && !isNewCard } }
         }
-
     }
-
 }

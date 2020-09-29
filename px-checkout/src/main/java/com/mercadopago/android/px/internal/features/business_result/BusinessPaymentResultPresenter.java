@@ -4,16 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.mercadopago.android.px.addons.FlowBehaviour;
 import com.mercadopago.android.px.internal.base.BasePresenter;
+import com.mercadopago.android.px.internal.features.payment_congrats.model.FlowBehaviourResultMapper;
+import com.mercadopago.android.px.internal.features.payment_congrats.model.PaymentCongratsModel;
+import com.mercadopago.android.px.internal.features.payment_congrats.model.PaymentCongratsResponse;
 import com.mercadopago.android.px.internal.features.payment_result.CongratsAutoReturn;
-import com.mercadopago.android.px.internal.repository.PaymentSettingRepository;
 import com.mercadopago.android.px.internal.util.TextUtil;
 import com.mercadopago.android.px.internal.view.ActionDispatcher;
 import com.mercadopago.android.px.internal.view.PaymentResultBody;
-import com.mercadopago.android.px.internal.viewmodel.BusinessPaymentModel;
-import com.mercadopago.android.px.internal.viewmodel.mappers.FlowBehaviourResultMapper;
 import com.mercadopago.android.px.model.Action;
 import com.mercadopago.android.px.model.ExitAction;
-import com.mercadopago.android.px.model.internal.CongratsResponse;
 import com.mercadopago.android.px.model.internal.PrimaryExitAction;
 import com.mercadopago.android.px.model.internal.SecondaryExitAction;
 import com.mercadopago.android.px.tracking.internal.events.AbortEvent;
@@ -29,22 +28,21 @@ import com.mercadopago.android.px.tracking.internal.events.SeeAllDiscountsEvent;
 import com.mercadopago.android.px.tracking.internal.events.ViewReceiptEvent;
 import com.mercadopago.android.px.tracking.internal.views.ResultViewTrack;
 import kotlin.Unit;
+import org.jetbrains.annotations.NotNull;
 
 /* default */ class BusinessPaymentResultPresenter extends BasePresenter<BusinessPaymentResultContract.View>
     implements ActionDispatcher, BusinessPaymentResultContract.Presenter, PaymentResultBody.Listener {
 
-    @NonNull private final PaymentSettingRepository paymentSettings;
-    private final BusinessPaymentModel model;
+    @NonNull private final PaymentCongratsModel model;
     private final ResultViewTrack viewTracker;
     private final FlowBehaviour flowBehaviour;
     @Nullable private CongratsAutoReturn.Timer autoReturnTimer;
 
-    /* default */ BusinessPaymentResultPresenter(@NonNull final PaymentSettingRepository paymentSettings,
-        @NonNull final BusinessPaymentModel model, @NonNull final FlowBehaviour flowBehaviour, final boolean isMP) {
-        this.paymentSettings = paymentSettings;
+    /* default */ BusinessPaymentResultPresenter(@NonNull final PaymentCongratsModel model,
+        @NonNull final FlowBehaviour flowBehaviour, final boolean isMP) {
         this.model = model;
         this.flowBehaviour = flowBehaviour;
-        viewTracker = new ResultViewTrack(model, paymentSettings, isMP);
+        viewTracker = new ResultViewTrack(model, isMP);
     }
 
     @Override
@@ -56,7 +54,7 @@ import kotlin.Unit;
     @Override
     public void onFreshStart() {
         viewTracker.track();
-        flowBehaviour.trackConversion(new FlowBehaviourResultMapper().map(model.getPayment()));
+        flowBehaviour.trackConversion(new FlowBehaviourResultMapper().map(model.getCongratsType()));
     }
 
     @Override
@@ -71,6 +69,8 @@ import kotlin.Unit;
         if (autoReturnTimer != null) {
             autoReturnTimer.cancel();
         }
+        viewTracker.track();
+        flowBehaviour.trackConversion(new FlowBehaviourResultMapper().map(model.getCongratsType()));
     }
 
     @Override
@@ -82,7 +82,6 @@ import kotlin.Unit;
     @Override
     public void dispatch(final Action action) {
         if (action instanceof ExitAction) {
-            // Hack for tracking
             if (action instanceof PrimaryExitAction) {
                 new PrimaryActionEvent(viewTracker).track();
             } else if (action instanceof SecondaryExitAction) {
@@ -96,7 +95,7 @@ import kotlin.Unit;
 
     private void mapPaymentModel() {
         final BusinessPaymentResultViewModel viewModel = new BusinessPaymentResultMapper(
-            paymentSettings.getCheckoutPreference().getAutoReturn()).map(model);
+            model.getAutoReturn()).map(model);
         getView().configureViews(viewModel, this);
         getView().setStatusBarColor(viewModel.headerModel.getBackgroundColor());
         initAutoReturn(viewModel.shouldAutoReturn);
@@ -160,9 +159,9 @@ import kotlin.Unit;
 
     @Override
     public void onClickMoneySplit() {
-        final CongratsResponse.MoneySplit moneySplit = model.getCongratsResponse().getMoneySplit();
+        final PaymentCongratsResponse.ExpenseSplit moneySplit = model.getPaymentCongratsResponse().getExpenseSplit();
         final String deepLink;
-        if (moneySplit != null && (deepLink = moneySplit.getAction().getTarget()) !=  null) {
+        if (moneySplit != null && (deepLink = moneySplit.getAction().getTarget()) != null) {
             new CongratsSuccessDeepLink(DeepLinkType.MONEY_SPLIT_TYPE, deepLink).track();
             getView().launchDeepLink(deepLink);
         }

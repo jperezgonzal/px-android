@@ -5,13 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import com.mercadopago.android.px.internal.base.BaseViewModel
 import com.mercadopago.android.px.internal.extensions.orIfEmpty
 import com.mercadopago.android.px.internal.features.pay_button.PayButton.OnReadyForPaymentCallback
+import com.mercadopago.android.px.internal.livedata.MutableSingleLiveData
 import com.mercadopago.android.px.internal.repository.AmountRepository
 import com.mercadopago.android.px.internal.repository.DiscountRepository
 import com.mercadopago.android.px.internal.repository.InitRepository
 import com.mercadopago.android.px.internal.repository.PaymentSettingRepository
 import com.mercadopago.android.px.internal.util.TextUtil
 import com.mercadopago.android.px.internal.viewmodel.AmountLocalized
-import com.mercadopago.android.px.internal.viewmodel.custom.MutableSingleLiveData
 import com.mercadopago.android.px.model.OfflineMethodsCompliance
 import com.mercadopago.android.px.model.SensitiveInformation
 import com.mercadopago.android.px.model.internal.PaymentConfiguration

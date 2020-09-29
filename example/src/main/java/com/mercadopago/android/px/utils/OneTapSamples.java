@@ -13,6 +13,7 @@ import com.mercadopago.android.px.configuration.TrackingConfiguration;
 import com.mercadopago.android.px.core.MercadoPagoCheckout;
 import com.mercadopago.android.px.core.SplitPaymentProcessor;
 import com.mercadopago.android.px.model.GenericPayment;
+import com.mercadopago.android.px.model.IParcelablePaymentDescriptor;
 import com.mercadopago.android.px.model.IPaymentDescriptor;
 import com.mercadopago.android.px.model.Item;
 import com.mercadopago.android.px.model.Payment;
@@ -33,9 +34,9 @@ import static com.mercadopago.android.px.utils.PaymentUtils.getGenericPaymentRej
 public final class OneTapSamples {
 
     private static final String ONE_TAP_PAYER_1_ACCESS_TOKEN =
-        "APP_USR-3671576383500204-072117-d275735575b2b95458be231afc00f14c-506902649";
+        "TEST-3671576383500204-072117-086cdd7b06fbb54a4cba7708659e3ee8-506902649";
     private static final String ONE_TAP_PAYER_2_ACCESS_TOKEN =
-        "APP_USR-3666825723887583-102916-54c728cfd9eea30e98073b19617a5eec-484351849";
+        "TEST-3666825723887583-102916-f8a75d002f955d32d992817a4b856fbb-484351849";
     private static final String ONE_TAP_PAYER_3_ACCESS_TOKEN =
         "TEST-244508097630521-031308-7b8b58d617aec50b3e528ca98606b116__LC_LA__-150216849";
     private static final String ONE_TAP_PAYER_4_ACCESS_TOKEN =
@@ -199,7 +200,7 @@ public final class OneTapSamples {
     // It should suggest one tap with account money
     private static MercadoPagoCheckout.Builder startOneTapWithAccountMoneyAndCardsDebitCreditAndRejectedPayment() {
 
-        final IPaymentDescriptor payment = getGenericPaymentRejected();
+        final IParcelablePaymentDescriptor payment = getGenericPaymentRejected();
         final SplitPaymentProcessor samplePaymentProcessor = new SamplePaymentProcessor(payment);
         final CheckoutPreference preference = getCheckoutPreferenceWithPayerEmail(120);
         return new MercadoPagoCheckout.Builder(ONE_TAP_MERCHANT_PUBLIC_KEY, preference,

@@ -530,10 +530,12 @@ public abstract class GuessingCardPresenter extends BasePresenter<GuessingCard.V
     protected void resolveIdentificationTypes(final List<IdentificationType> identificationTypeList) {
         saveIdentificationTypes(identificationTypeList);
         //TODO identificationTypes are filtered until new card flow + cnpj is analized.
-        if (identificationTypes == null || identificationTypes.isEmpty()) {
-            getView().showMissingIdentificationTypesError(false, ApiUtil.RequestOrigin.GET_IDENTIFICATION_TYPES);
-        } else {
-            getView().initializeIdentificationTypes(identificationTypes, identificationType);
+        if (isViewAttached()) {
+            if (identificationTypes == null || identificationTypes.isEmpty()) {
+                getView().showMissingIdentificationTypesError(false, ApiUtil.RequestOrigin.GET_IDENTIFICATION_TYPES);
+            } else {
+                getView().initializeIdentificationTypes(identificationTypes, identificationType);
+            }
         }
     }
 

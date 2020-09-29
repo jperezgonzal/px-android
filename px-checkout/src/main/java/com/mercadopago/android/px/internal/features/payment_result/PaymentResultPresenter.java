@@ -170,16 +170,18 @@ import kotlin.Unit;
     }
 
     private void configureView(@Nullable final Instruction instruction) {
-        final PaymentResultViewModel viewModel = new PaymentResultViewModelMapper(screenConfiguration, instruction,
-            paymentSettings.getCheckoutPreference().getAutoReturn()).map(paymentModel);
-        getView().configureViews(viewModel, paymentModel, this);
-        getView().setStatusBarColor(viewModel.headerModel.getBackgroundColor());
-        if (viewModel.shouldAutoReturn) {
-            autoReturnTimer = new CongratsAutoReturn.Timer(() -> {
-                autoReturnTimer = null;
-                onAbort();
-                return Unit.INSTANCE;
-            });
+        if (isViewAttached()) {
+            final PaymentResultViewModel viewModel = new PaymentResultViewModelMapper(screenConfiguration, instruction,
+                paymentSettings.getCheckoutPreference().getAutoReturn()).map(paymentModel);
+            getView().configureViews(viewModel, paymentModel, this);
+            getView().setStatusBarColor(viewModel.headerModel.getBackgroundColor());
+            if (viewModel.shouldAutoReturn) {
+                autoReturnTimer = new CongratsAutoReturn.Timer(() -> {
+                    autoReturnTimer = null;
+                    onAbort();
+                    return Unit.INSTANCE;
+                });
+            }
         }
     }
 

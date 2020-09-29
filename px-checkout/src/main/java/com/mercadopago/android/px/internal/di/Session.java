@@ -9,6 +9,7 @@ import com.mercadopago.android.px.addons.model.SecurityValidationData;
 import com.mercadopago.android.px.configuration.AdvancedConfiguration;
 import com.mercadopago.android.px.configuration.PaymentConfiguration;
 import com.mercadopago.android.px.core.MercadoPagoCheckout;
+import com.mercadopago.android.px.core.internal.MercadoPagoCardStorage;
 import com.mercadopago.android.px.core.internal.TrackingRepositoryModelMapper;
 import com.mercadopago.android.px.internal.configuration.InternalConfiguration;
 import com.mercadopago.android.px.internal.core.ApplicationModule;
@@ -34,6 +35,8 @@ import com.mercadopago.android.px.internal.datasource.cache.Cache;
 import com.mercadopago.android.px.internal.datasource.cache.InitCacheCoordinator;
 import com.mercadopago.android.px.internal.datasource.cache.InitDiskCache;
 import com.mercadopago.android.px.internal.datasource.cache.InitMemCache;
+import com.mercadopago.android.px.internal.features.payment_congrats.model.PXPaymentCongratsTracking;
+import com.mercadopago.android.px.internal.features.payment_congrats.model.PaymentCongratsModel;
 import com.mercadopago.android.px.internal.repository.AmountConfigurationRepository;
 import com.mercadopago.android.px.internal.repository.AmountRepository;
 import com.mercadopago.android.px.internal.repository.BankDealsRepository;
@@ -142,8 +145,28 @@ public final class Session extends ApplicationModule {
         // end Store persistent paymentSetting
     }
 
-    public boolean isInitialized() {
-        return configurationModule.getPaymentSettings().isPaymentConfigurationValid();
+    public void init(@NonNull final PaymentCongratsModel paymentCongratsModel) {
+        clear();
+        final PXPaymentCongratsTracking trackingData = paymentCongratsModel.getPxPaymentCongratsTracking();
+        configurationModule.getTrackingRepository().configure(
+            new TrackingRepository.Model(trackingData.getSessionId(), trackingData.getFlow(),
+                trackingData.getFlowExtraInfo()));
+    }
+
+    public void init(@NonNull final MercadoPagoCardStorage cardStorage) {
+        clear();
+    }
+
+    public State getSessionState() {
+        try {
+            if (configurationModule.getPaymentSettings().getPaymentConfiguration() != null) {
+                return Session.State.VALID;
+            } else {
+                return Session.State.UNKNOWN;
+            }
+        } catch (final Exception e) {
+            return Session.State.INVALID;
+        }
     }
 
     private void resolvePreference(@NonNull final MercadoPagoCheckout mercadoPagoCheckout,
@@ -402,7 +425,7 @@ public final class Session extends ApplicationModule {
             final PaymentSettingRepository paymentSettings = getConfigurationModule().getPaymentSettings();
             congratsRepository = new CongratsRepositoryImpl(congratsService, getInitRepository(), paymentSettings,
                 getPlatform(getApplicationContext()), configurationModule.getTrackingRepository(),
-                configurationModule.getUserSelectionRepository(), amountRepository,
+                configurationModule.getUserSelectionRepository(), getAmountRepository(),
                 configurationModule.getDisabledPaymentMethodRepository(),
                 configurationModule.getPayerComplianceRepository(), getMercadoPagoESC());
         }
@@ -433,5 +456,11 @@ public final class Session extends ApplicationModule {
             .isSecurityEnabled(new SecurityValidationData.Builder(productId).build());
         MPTracker.getInstance().setSecurityEnabled(securityEnabled);
         configurationModule.getProductIdProvider().configure(productId);
+    }
+
+    public enum State {
+        VALID,
+        INVALID,
+        UNKNOWN
     }
 }

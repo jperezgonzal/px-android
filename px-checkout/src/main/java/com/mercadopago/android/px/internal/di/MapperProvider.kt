@@ -18,7 +18,7 @@ internal object MapperProvider {
 
     fun getPaymentMethodDescriptorMapper(): PaymentMethodDescriptorMapper {
         return PaymentMethodDescriptorMapper(
-            Session.getInstance().configurationModule.paymentSettings.currency,
+            Session.getInstance().configurationModule.paymentSettings,
             Session.getInstance().amountConfigurationRepository,
             Session.getInstance().configurationModule.disabledPaymentMethodRepository,
             Session.getInstance().amountRepository

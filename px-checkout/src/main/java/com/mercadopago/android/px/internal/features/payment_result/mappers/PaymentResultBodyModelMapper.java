@@ -3,7 +3,9 @@ package com.mercadopago.android.px.internal.features.payment_result.mappers;
 import androidx.annotation.NonNull;
 import com.mercadopago.android.px.configuration.PaymentResultScreenConfiguration;
 import com.mercadopago.android.px.internal.features.business_result.BusinessPaymentResultTracker;
-import com.mercadopago.android.px.internal.features.business_result.CongratsResponseMapper;
+import com.mercadopago.android.px.internal.features.business_result.PaymentCongratsResponseMapper;
+import com.mercadopago.android.px.internal.features.payment_congrats.model.PaymentCongratsResponse;
+import com.mercadopago.android.px.internal.features.payment_congrats.model.CongratsViewModelMapper;
 import com.mercadopago.android.px.internal.view.PaymentResultBody;
 import com.mercadopago.android.px.internal.view.PaymentResultMethod;
 import com.mercadopago.android.px.internal.viewmodel.PaymentModel;
@@ -25,6 +27,8 @@ public class PaymentResultBodyModelMapper extends Mapper<PaymentModel, PaymentRe
     public PaymentResultBody.Model map(@NonNull final PaymentModel model) {
         final PaymentResult paymentResult = model.getPaymentResult();
         final List<PaymentResultMethod.Model> methodModels = new ArrayList<>();
+        final PaymentCongratsResponse paymentCongratsResponse = new PaymentCongratsResponseMapper()
+            .map(model.getCongratsResponse());
         for (final PaymentData paymentData : paymentResult.getPaymentDataList()) {
             final String imageUrl =
                 model.getCongratsResponse().getPaymentMethodsImages().get(paymentData.getPaymentMethod().getId());
@@ -33,8 +37,8 @@ public class PaymentResultBodyModelMapper extends Mapper<PaymentModel, PaymentRe
 
         return new PaymentResultBody.Model.Builder()
             .setMethodModels(methodModels)
-            .setCongratsViewModel(new CongratsResponseMapper(new BusinessPaymentResultTracker())
-                .map(model.getCongratsResponse()))
+            .setCongratsViewModel(new CongratsViewModelMapper(new BusinessPaymentResultTracker())
+                .map(paymentCongratsResponse))
             .setReceiptId(String.valueOf(paymentResult.getPaymentId()))
             .setTopFragment(configuration.getTopFragment())
             .setBottomFragment(configuration.getBottomFragment())

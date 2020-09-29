@@ -1,3 +1,28 @@
+## VERSION 4.59.3
+_25_09_2020_
+* FIX - PaymentCongrats tracks path with standalone flow.
+
+## VERSION 4.59.2
+_24_09_2020_
+* FIX - PaymentCongrats crash with "in process" payments.
+* FIX - PaymentCongrats crash with unknown payment types.
+* FIX - Session not cleared on non checkout flows.
+
+## VERSION 4.59.1
+_17_09_2020_
+* ENHANCEMENT - Improved offline methods bottom sheet opening.
+* FIX - Check if view is attached in some cases.
+* FIX - Cleared payer cost selection properly.
+
+## VERSION 4.59.0
+_15_09_2020_
+* FEATURE - Standalone PaymentCongrats flow.
+* ENHANCEMENT - Replaced Event with SingleLiveData.
+* FIX - PostPaymentUrls are now serializable.
+* FIX - Another ExplodingFragment crash.
+* FIX - Avoid null PaymentConfiguration.
+* FIX - Back handler when fragment is not added.
+
 ## VERSION 4.58.0
 _03_09_2020_
 * ENHANCEMENT - Added PaymentService and PayButtonViewModel unit tests.
